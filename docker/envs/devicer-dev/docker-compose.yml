@@ -1,0 +1,25 @@
+services:
+  devicer_postgres:
+    container_name: devicer_postgres
+    image: postgres:12.2
+    hostname: "${DEVICER_POSTGRES_HOST}"
+    environment:
+      POSTGRES_USER: ${DEVICER_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DEVICER_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DEVICER_POSTGRES_DB}
+      PGDATA: ${DEVICER_POSTGRES_PGDATA}
+    volumes:
+      - devicer_postgres:${DEVICER_POSTGRES_PGDATA}
+    expose:
+      - ${DEVICER_POSTGRES_PORT}
+    ports:
+      - "${DEVICER_POSTGRES_PORT}:${DEVICER_POSTGRES_PORT}"
+    networks:
+      - devicer_network
+    restart: "no"
+
+networks:
+  devicer_network:
+
+volumes:
+  devicer_postgres:
