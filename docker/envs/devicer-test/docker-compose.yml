@@ -1,0 +1,25 @@
+services:
+  devicer_test_postgres:
+    container_name: devicer_test_postgres
+    image: postgres:12.2
+    hostname: "${DEVICER_TEST_POSTGRES_HOST}"
+    environment:
+      POSTGRES_USER: ${DEVICER_TEST_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DEVICER_TEST_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DEVICER_TEST_POSTGRES_DB}
+      PGDATA: ${DEVICER_TEST_POSTGRES_PGDATA}
+    volumes:
+      - devicer_test_postgres:${DEVICER_TEST_POSTGRES_PGDATA}
+    expose:
+      - ${DEVICER_TEST_POSTGRES_PORT}
+    ports:
+      - "${DEVICER_TEST_POSTGRES_PORT}:5432"
+    networks:
+      - devicer_test_network
+    restart: "no"
+
+networks:
+  devicer_test_network:
+
+volumes:
+  devicer_test_postgres:

@@ -27,7 +27,7 @@ export function UserEmailUniqueValidator(
 export class UserEmailUniqueConstraint implements ValidatorConstraintInterface {
   constructor(private signupService: SignupService) {}
 
-  async validate(value: number) {
+  async validate(value: string) {
     // normalize email first
     const normalizedEmail = normalizeEmail(value);
 

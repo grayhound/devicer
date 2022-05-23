@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, Validate } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 import { UserEmailUniqueValidator } from '../validators/UserEmailUnique.validator';
 import { MatchValidator } from '../validators/match.validator';
 

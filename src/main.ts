@@ -19,7 +19,7 @@ async function bootstrap() {
     new TrimStringsPipe(),
     new ValidationPipe({
       transform: true,
-      stopAtFirstError: false,
+      stopAtFirstError: true,
       validationError: {
         target: false,
       },
