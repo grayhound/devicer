@@ -13,11 +13,11 @@ const config = {
   logging: false,
   migrationsRun: true,
 
-  entities: ['dist/**/modules/**/*.entity{.ts,.js}'],
+  entities: ['src/modules/**/*.entity.ts'],
 
   migrationsTableName: 'migrations',
 
-  migrations: ['dist/migrations/*{.ts,.js}'],
+  migrations: ['src/migrations/*.ts'],
 };
 
 export default config;

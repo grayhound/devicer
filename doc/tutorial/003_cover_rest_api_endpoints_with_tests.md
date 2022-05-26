@@ -49,3 +49,7 @@ This test is truly simple and will check root endpoint.
 Test will be passed, 'cause we made no changes to the `src/app.controller.ts`.
 
 ## Preparation.
+
+supertest
+jest-extended
+jest-chain

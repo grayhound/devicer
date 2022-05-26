@@ -7,10 +7,7 @@ import { UserModule } from './modules/user/user.module';
 import { SignupModule } from './modules/signup/signup.module';
 import { loadAppConfig } from './config/loadAppConfig';
 
-// detect if this is test environment
-const appConfigType = process.env.TEST_ENV === '1' ? 'test' : 'main';
-// load config for `test` or `main`
-const config = loadAppConfig(appConfigType);
+const config = loadAppConfig(process.env.NODE_ENV);
 
 @Module({
   imports: [

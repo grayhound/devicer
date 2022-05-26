@@ -1,20 +1,14 @@
-import {
-  Body,
-  ClassSerializerInterceptor,
-  Controller,
-  Post,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { SignupService } from './signup.service';
 import { SignupUserValidatorDto } from './dto/signupUser.validator.dto';
+import { SignupUserResultDto } from './dto/signupUser.result.dto';
 
 @Controller('signup')
 export class SignupController {
   constructor(private readonly signupService: SignupService) {}
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  async create(@Body() signupUserDto: SignupUserValidatorDto): Promise<any> {
+  async create(@Body() signupUserDto: SignupUserValidatorDto): Promise<SignupUserResultDto> {
     // incoming data is validated. Now we can signup user!
     const newUser = await this.signupService.signup(signupUserDto);
 

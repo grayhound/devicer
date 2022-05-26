@@ -140,13 +140,13 @@ The main command for typeorm cli is:
 
 To generate new migration you should run:
 
-`npx typeorm-ts-node-commonjs migration:generate src/migrations/UserInit -d src\config\typeorm.datasource.ts`
+`npx typeorm-ts-node-commonjs migration:generate src/migrations/Tst -d src/config/envs/main/typeorm.datasource.ts`
 
 Here, `src/migrations/UserInit` is a path/filename for our new migration. `-d` parameter is path to our config with DataSource.
 
 We have migration file now and can just run:
 
-`npx typeorm-ts-node-commonjs migration:run -d src/config/typeorm.datasource.ts`
+`npx typeorm-ts-node-commonjs migration:run -d src/config/envs/main/typeorm.datasource.ts`
 
 Voila! Changes are in the database now! Go check it with pgAdmin! You will see new tables. 
 
@@ -756,23 +756,17 @@ Here we exclude most fields and show only `email`.
 Now we should update our controller `src/modules/signup/signup.controller.ts`:
 
 ```typescript
-import {
-  Body,
-  ClassSerializerInterceptor,
-  Controller,
-  Post,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { SignupService } from './signup.service';
 import { SignupUserValidatorDto } from './dto/signupUser.validator.dto';
+import { SignupUserResultDto } from './dto/signupUser.result.dto';
 
 @Controller('signup')
 export class SignupController {
   constructor(private readonly signupService: SignupService) {}
-
-  @UseInterceptors(ClassSerializerInterceptor)
+  
   @Post()
-  async create(@Body() signupUserDto: SignupUserValidatorDto): Promise<any> {
+  async create(@Body() signupUserDto: SignupUserValidatorDto): Promise<SignupUserResultDto> {
     // incoming data is validated. Now we can signup user!
     const newUser = await this.signupService.signup(signupUserDto);
 

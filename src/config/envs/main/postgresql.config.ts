@@ -11,7 +11,7 @@ const config = {
   synchronize: false,
   logging: true,
 
-  entities: ['dist/**/modules/**/*.entity{.ts,.js}'],
+  entities: ['dist/modules/**/*.entity{.ts,.js}'],
 
   migrationsTableName: 'migrations',
 

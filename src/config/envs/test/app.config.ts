@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import postgresConfig from './postgresql.config.test';
+import postgresConfig from './postgresql.config';
 
 /**
  * Getting configuration data for testing.

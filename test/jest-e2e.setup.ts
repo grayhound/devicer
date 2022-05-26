@@ -10,19 +10,21 @@ import * as dotenv from 'dotenv';
 import { ConfigService } from '@nestjs/config';
 import { useContainer } from 'class-validator';
 import { TrimStringsPipe } from '../src/base/transformer/trim-strings.pipe';
+import 'jest-extended';
+import * as matchers from 'jest-extended/all';
+expect.extend(matchers);
 
 dotenv.config();
 
-process.env.TEST_ENV = '1';
-
-let app: INestApplication;
-
-beforeAll(async () => {
+/**
+ * Setup test application
+ */
+async function setupTestApplication(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
 
-  app = moduleFixture.createNestApplication();
+  const app: INestApplication = moduleFixture.createNestApplication();
 
   const configService = app.get(ConfigService);
 
@@ -45,16 +47,23 @@ beforeAll(async () => {
     type: VersioningType.URI,
   });
 
-  console.log(configService);
-
   await app.listen(configService.get('api').port);
   await app.init();
-});
 
-afterAll(async () => {
-  await app.close();
-});
-
-export function getServerApp() {
   return app;
 }
+
+/**
+ * Setup globals to use in tests.
+ */
+beforeAll(async () => {
+  global.app = await setupTestApplication(); // application itself
+  global.prefix = '/v1'; // REST api endpoints urls prefix
+});
+
+/**
+ * Close application after all tests.
+ */
+afterAll(async () => {
+  await global.app.close();
+});
