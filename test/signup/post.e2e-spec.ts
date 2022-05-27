@@ -1,4 +1,5 @@
 import * as request from 'supertest';
+import exp from 'constants';
 
 describe('[POST] /signup endpoint', () => {
   // check up variables
@@ -29,6 +30,7 @@ describe('[POST] /signup endpoint', () => {
       correct: 'test',
     },
     passwordCheck: {
+      correct: 'test',
       incorrect: 'Test',
     },
   };
@@ -229,22 +231,31 @@ describe('[POST] /signup endpoint', () => {
         constraints: expect.toContainKey('isNotEmpty'),
       },
     ]);
+
+    // error for property `passwordCheck` if passwords differ
+    expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'passwordCheck',
+        constraints: expect.toContainKey('PasswordsMatch'),
+      },
+    ]);
+  });
+
+  it('should signup user if everything is correct', async () => {
+    const data = {
+      email: checkUps.email.correct,
+      password: checkUps.password.correct,
+      passwordCheck: checkUps.passwordCheck.correct,
+    };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(201);
+    expect(res.body).toBeObject();
+    expect(res.body).toHaveProperty('email');
   });
 
   /*
-  it('should return success if everything is correct', (done) => {
-    const data = {username: 'jasonhound', email: 'test@test.com'};
-    chai.request(app.server)
-    .post(`${options.apiPrefix}/users/signup`)
-    .send(data)
-    .end((err, res) => {
-      res.should.have.status(200);
-      res.body.should.have.property('token');
-      res.body.should.have.property('refreshToken');
-      done();
-    });
-  });
-
   it('user data must be correct', (done) => {
     app.models.User.findOne({email: 'test@test.com'}).exec().then((user) => {
       user._id.should.exist;
