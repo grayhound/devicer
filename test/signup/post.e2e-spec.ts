@@ -1,6 +1,6 @@
 import * as request from 'supertest';
 
-describe('/signup endpoint', () => {
+describe('[POST] /signup endpoint', () => {
   // check up variables
   const checkUps = {
     email: {
@@ -24,6 +24,12 @@ describe('/signup endpoint', () => {
 
       // test number - incorrect email
       numberIncorrect: 1000,
+    },
+    password: {
+      correct: 'test',
+    },
+    passwordCheck: {
+      incorrect: 'Test',
     },
   };
 
@@ -143,6 +149,81 @@ describe('/signup endpoint', () => {
 
     // error for property 'passwordCheck' with constraints 'isNotEmpty'
     expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'passwordCheck',
+        constraints: expect.toContainKey('isNotEmpty'),
+      },
+    ]);
+  });
+
+  it('should not return error if `password` is present', async () => {
+    const data = {
+      email: checkUps.email.correct,
+      password: checkUps.password.correct,
+    };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(422);
+    expect(res.body.statusCode).toBe(422);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBeInstanceOf(Array);
+
+    // should not return error with property email
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'email',
+      },
+    ]);
+
+    // should not return error for property 'password' with constraints 'isNotEmpty'
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'password',
+        constraints: expect.toContainKey('isNotEmpty'),
+      },
+    ]);
+
+    // error for property 'passwordCheck' with constraints 'isNotEmpty'
+    expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'passwordCheck',
+        constraints: expect.toContainKey('isNotEmpty'),
+      },
+    ]);
+  });
+
+  it('should not return error if `passwordCheck` is present (but still not equal to to password)', async () => {
+    const data = {
+      email: checkUps.email.correct,
+      password: checkUps.password.correct,
+      passwordCheck: checkUps.passwordCheck.incorrect,
+    };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(422);
+    expect(res.body.statusCode).toBe(422);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBeInstanceOf(Array);
+
+    // should not return error with property email
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'email',
+      },
+    ]);
+
+    // should not return error for property 'password' with constraints 'isNotEmpty'
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'password',
+        constraints: expect.toContainKey('isNotEmpty'),
+      },
+    ]);
+
+    // error for property 'passwordCheck' with constraints 'isNotEmpty'
+    expect(res.body.message).not.toIncludeAllPartialMembers([
       {
         property: 'passwordCheck',
         constraints: expect.toContainKey('isNotEmpty'),
