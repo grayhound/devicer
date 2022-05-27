@@ -35,3 +35,19 @@ In this tutorial we will use:
 - [Socket.io](https://socket.io/) for websockets and showing data real-time
 - [Docker](https://www.docker.com/) for easy way to develop and deploy
 - [Postman](https://www.postman.com/) to test out REST API
+
+## Command shortcusts
+
+Frequent CLI commands:
+
+run development server:
+`npm run start:dev`
+
+run end-to-end tests:
+`npm run test:e2e` 
+
+generate new migrations with %migration_name% name:
+`npx typeorm-ts-node-commonjs migration:generate src/migrations/%migration_name% -d src/config/envs/dev/typeorm.datasource.ts`
+
+run migrations: 
+`npx typeorm-ts-node-commonjs migration:run -d src/config/envs/dev/typeorm.datasource.ts`

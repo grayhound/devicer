@@ -4,13 +4,13 @@
 
 We have everything ready to start making our own modules.
 
-Let's create new resource using nest. We need a resource "User". Run command:
+Let's create new resource using nest. We need a resource `User`. Run command:
 
 `nest g res modules/user`
 
 This will generate default CRUD structure for User.
 
-For good practice I also recommend to generate separate module 'signup' and controller for '/v1/signup'
+For good practice I also recommend to generate separate module `signup` and controller for `/v1/signup`
 
 `nest g module modules/signup`
 `nest g controller modules/signup`
@@ -20,7 +20,7 @@ For good practice I also recommend to generate separate module 'signup' and cont
 
 ## Create new entity.
 
-Now, let's create User entity.
+Now, we can create `User` entity.
 
 But first, let's create basic abstract class for entities. We will extend other entities based on this one.
 
@@ -51,7 +51,7 @@ export abstract class BaseEntity {
 >
 > Unfortunately it will generate random constraint name for this `Primary Key`. The name will be something like `PK_a3ffb1c0c8416b9fc6f907b7433`
 >
-> Database Architect (DBA) won't like it all. Unfortunatelly with TypeORM 0.3.6 there's no way to set this name by hand.
+> Database Architect (DBA) won't like it all. With TypeORM 0.3.6 there's no way to set this name by hand.
 >  
 > Fortunately, there's a good pool request which is already merged - [https://github.com/typeorm/typeorm/pull/8900](https://github.com/typeorm/typeorm/pull/8900)
 >
@@ -94,7 +94,7 @@ export class User extends BaseEntity {
 ```
 
 Here we can see fields:
-- email,which is unique and indexed
+- email, which is unique and indexed
 - password - here we will save password hash
 - emailOriginal - this one will save original input of email by user. 
 User may prefer to input 'Email@email.com', but we will normalize it to 'email@email.com' for `email` field and save original input by user for `emailOriginal` field.
@@ -115,11 +115,11 @@ This is were database migrations come to aid!
 
 We need a correct DataSource to use typeorm cli commands. 
 
-Create file `src/config/typeorm.datasource.ts` file:
+Create file `src/config/envs/dev/typeorm.datasource.ts` file:
 
 ```typescript
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '.env.dev' });
 
 import { DataSource, DataSourceOptions } from 'typeorm';
 
@@ -130,6 +130,7 @@ const postgresDSO: DataSourceOptions = <DataSourceOptions>postgresConfig;
 const AppDataSource = new DataSource(postgresDSO);
 
 export default AppDataSource;
+
 ```
 
 As you can see we are using `postgresql.config.ts` again and don't duplicate configuration files.
@@ -140,13 +141,13 @@ The main command for typeorm cli is:
 
 To generate new migration you should run:
 
-`npx typeorm-ts-node-commonjs migration:generate src/migrations/Tst -d src/config/envs/main/typeorm.datasource.ts`
+`npx typeorm-ts-node-commonjs migration:generate src/migrations/UserInit -d src/config/envs/dev/typeorm.datasource.ts`
 
 Here, `src/migrations/UserInit` is a path/filename for our new migration. `-d` parameter is path to our config with DataSource.
 
 We have migration file now and can just run:
 
-`npx typeorm-ts-node-commonjs migration:run -d src/config/envs/main/typeorm.datasource.ts`
+`npx typeorm-ts-node-commonjs migration:run -d src/config/envs/dev/typeorm.datasource.ts`
 
 Voila! Changes are in the database now! Go check it with pgAdmin! You will see new tables. 
 
@@ -245,7 +246,7 @@ To cover this case we need to create a transformer that will be added as a `Glob
 
 I got this idea from one of the NestJS boilerplates [https://github.com/Vivify-Ideas/nestjs-boilerplate](https://github.com/Vivify-Ideas/nestjs-boilerplate)
 
-This boilerplate is good. Unfortunately is uses outdated TypeORM 0.2.x
+This boilerplate is good. Unfortunately it uses outdated TypeORM 0.2.x
 
 But the idea of global trimming (and global transforming too) is still good and we will use it.
 
@@ -352,6 +353,7 @@ async function bootstrap() {
     defaultVersion: '1',
     type: VersioningType.URI,
   });
+
   await app.listen(configService.get('api').port);
 }
 
@@ -380,7 +382,7 @@ export class SignupUserValidatorDto {
 
 Right now it doesn't affect all the rules we need but enough for us to test.
 
-User `Postman` to send POST request `http://localhost:3000/v1/signup/` with empty data.
+Use `Postman` to send POST request `http://localhost:3000/v1/signup/` with empty data.
 
 You will get an 422 error looking like this:
 
@@ -494,7 +496,7 @@ If user already exists - we return `false` and endpoint will return an error for
 
 Now, as you can see, we have new method `findUserByEmail` for `Signup Service`.
 
-Let's create `src/signup/signup.service.ts`:
+Let's edit `src/signup/signup.service.ts`:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -600,7 +602,7 @@ export class SignupUserValidatorDto {
 }
 ```
 
-Now, if passwords are different, you will get error like this:
+If passwords are different, you will get error like this:
 
 ```json
 {
@@ -626,7 +628,7 @@ More than that, you can use this validator as many times as you want on any fiel
 For example:
 
 ```typescript
-import { IsEmail, IsNotEmpty, Validate } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 import { UserEmailUniqueValidator } from '../validators/UserEmailUnique.validator';
 import { MatchValidator } from '../validators/match.validator';
 
@@ -638,15 +640,15 @@ export class SignupUserValidatorDto {
 
   @IsNotEmpty()
   password: string;
-
+  
   @MatchValidator('email', 'EmailMatch') // here's the the addition
-  @MatchValidator('password', 'PasswordsMatch') // here's the the addition
+  @MatchValidator('password', 'PasswordsMatch') // here's the the addition  
   @IsNotEmpty()
   passwordCheck: string;
 }
 ```
 
-This is really stupid example but if you will use `stopAtFirstError: true` at main.ts, you will see two different errors for `passwordMatch` field.
+This is really stupid example but if you will use `stopAtFirstError: false` at main.ts, you will see two different errors for `passwordMatch` field.
 
 Error will look something like this:
 

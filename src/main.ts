@@ -18,8 +18,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new TrimStringsPipe(),
     new ValidationPipe({
-      transform: true,
-      stopAtFirstError: true,
+      stopAtFirstError: false,
       validationError: {
         target: false,
       },

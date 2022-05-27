@@ -1,18 +1,38 @@
 # 1. Prepare our dev environment
 
-You need to have NodeJS with npm and Docker installed. 
+You need to have NodeJS with npm and Docker installed.  
 
-Create directory for the project - `devicer`
+## Install NestJS and create new project.
 
-In development phase NodeJS applications/micro-services don't need docker to run (at first). 
+Now we need to install NestJS globally:
+
+```npm i -g @nestjs/cli```
+
+Create a project itself:
+
+```nest new devicer``` 
+
+This will create `devicer` directory with NestJS project inside it.
+
+Now you can run development server:
+
+```npm run start:dev```
+
+You can open application inside your browser - [http://localhost:3000/](http://localhost:3000/). You will get to the "Hello world" page.
+
+NestJS in this mode will reload on any code changes.
+
+I highly recommend to use Postman to test REST API and its endpoints from now on.
 
 ## PostgreSQL at docker
+
+In development phase we won't user docker for applications/micro-services.
 
 But how about we prepare PostgreSQL instance running at docker?
 
 First, create directory `docker/envs/devicer-dev`. Here we will store our docker files.
 
-Now, create `.env` file. Docker-composer will catch variabled from this file.
+Now, create `docker/envs/devicer-dev.env` file. Docker-composer will catch variables from this file.
 
 Contents of `.env` file.
 ```
@@ -25,6 +45,8 @@ DEVICER_POSTGRES_PASSWORD="devicer"
 DEVICER_POSTGRES_PORT="5432"
 DEVICER_POSTGRES_PGDATA="/data/postgres"
 ```
+
+You can take `.env.example` as... an example. 
 
 Meanings of variables:
 
@@ -42,7 +64,7 @@ We need `docker-compose.yml` file now.
 services:
   devicer_postgres:
     container_name: devicer_postgres
-    image: postgres:12.2
+    image: postgres:14.3
     hostname: "${DEVICER_POSTGRES_HOST}"
     environment:
       POSTGRES_USER: ${DEVICER_POSTGRES_USER}
@@ -64,7 +86,6 @@ networks:
 
 volumes:
   devicer_postgres:
-
 ```
 
 Now you need to run
@@ -75,31 +96,9 @@ This will download PostgreSQL image, create container from it with according net
 
 You can also check connection to PostgreSQL using [pgAdmin](https://www.pgadmin.org/)
 
-## Install NestJS and create new project.
-
-Now we need to install NestJS globally:
-
-```npm i -g @nestjs/cli```
-
-Go back to the directory upper `devicer` directory and run:
-
-```nest new devicer``` 
-
-This will create NestJS project inside out `devicer` directory.
-
-Now you can run development server:
-
-```npm run start:dev```
-
-And now you can open application inside your browser - [http://localhost:3000/](http://localhost:3000/). You will get to the "Hello world" page.
-
-NestJS in this mode will reload code on any changes.
-
-I highly recommend to use Postman to test REST API and its endpoints from now on.
-
 ## Configuration file
 
-NestJS is ready, but it's not connected to the database yet. Let's do it.
+NestJS is ready, but it's not connected to the database yet. Let's do it!
 
 First, let's do some good code practice and create configuration files and use it in application.
 
@@ -108,9 +107,9 @@ In order to use configuration, we should install new packages:
 ```npm i --save @nestjs/config```
 ```npm i --save dotenv```
 
-We will split our configuration in few files.
+We will split our configuration in few files for different environments:
 
-First, we will create config for PostgreSQL. Create file `src/config/postgresql.config.ts`:
+First, we will create config for PostgreSQL. Create file `src/config/envs/dev/postgresql.config.ts`:
 
 ```typescript
 const config = {
@@ -130,17 +129,17 @@ const config = {
 
   migrationsTableName: 'migrations',
 
-  migrations: ['dist/migrations/*{.ts,.js}'],
+  migrations: ['dist/src/migrations/*{.ts,.js}'],
 };
 
 export default config;
 ```
 
-Now, create `src/config/config.main.ts` file.
+Now, create `src/config/envs/dev/config.main.ts` file.
 
 ```typescript
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '.env.dev' });
 
 import postgresConfig from './postgresql.config';
 
@@ -160,11 +159,11 @@ export default () => ({
 
 This config file returns config settings divided into `api` and `postgres` sections.
 
-You can set configuration via environment variables or `.env` file. 
+You can set configuration via environment variables or `.env.dev` file. 
 
-That `.env` file will be loaded automatically.
+That `.env.dev` file will be loaded via dotenv.
 
-Here's an example of `.env` file. You should place it in root directory of your project.
+Here's an example of `.env.dev` file. You should place it in root directory of your project.
 
 ```
 DEVICER_API_PORT=3000
@@ -176,18 +175,38 @@ DEVICER_POSTGRES_PASSWORD=devicer
 DEVICER_POSTGRES_DB=devicer
 ```
 
-Edit `src/app.module.ts`.
+Now we need a way to load different configuration files for different envs.
 
-Here, you import ConfigModule and `config/app.config.ts`.
+Create `src/config/loadAppConfig.ts`
 
-Then you load config in the `imports` section. 
+```typescript
+export function loadAppConfig(env = 'main') {
+  let config;
+  switch (env) {
+    case 'dev':
+      config = require('./envs/dev/app.config');
+      break;
+    default:
+      config = require('./envs/dev/app.config');
+  }
+
+  return config.default;
+}
+```
+
+It will load only `dev` environment for now, but we will more later on in the tutorial.
+
+Edit `src/app.module.ts` to load configuration we need.
+ 
 
 ```typescript
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import config from './config/app.config';
+import { loadAppConfig } from './config/loadAppConfig';
+
+const config = loadAppConfig(process.env.NODE_ENV);
 
 @Module({
   imports: [
@@ -256,16 +275,32 @@ export class AppModule {}
 
 We are using `TypeOrmModule.forRootAsync`. This helps us to import `ConfigModule` and inject `ConfigService`.
 
-This helps to use config parameters form `config/app.config.ts`
+This helps to use config parameters from `app.config.ts`
 
-NestJS server should restart automatically. Inside console you should now see:
+And the last thing. Install `cross-env` via command:
+
+`npm i cross-env --save-dev`
+
+Edit `package.json`. Find:
+
+`"start:dev": "nest start --watch",`
+
+and change it with:
+ 
+`"start:dev": "cross-env NODE_ENV=dev nest start --watch",`
+
+`cross-env` helps us to pass environment variables to the executable at any operating system.
+
+In this case with send `NODE_ENV=dev` and application will user `.env.dev` file and `src/config/envs/dev/*`
+
+Start NestJS server again with `npm run start:dev`.
+
+If everything is right, you should see log in the console from PostgreSQL:
 
 ```
 query: SELECT * FROM current_schema()
 query: SHOW server_version; 
 ```
-
-If everything is correct there should be no errors.
 
 ## Versioning.
 
