@@ -1,49 +1,39 @@
 import * as request from 'supertest';
 
+// check up variables
+const checkUps = {
+  email: {
+    // correct and incorrect email
+    incorrect: 'test',
+    correct: 'test@test.com',
+
+    // correct and duplicate email with uppercase
+    uppercaseDuplicate: 'Test@test.com',
+    uppercaseCorrect: 'Test2@test.com',
+
+    // whitespace correct and duplicate
+    whitespaceDuplicate: '  Test@test.com  ',
+    whitespaceCorrect: '    Test3@test.com   ',
+
+    // test inner whitespace - incorrect email
+    innerWhitespaceIncorrect: 'test @gm ail.com',
+
+    // test boolean - incorrect email
+    booleanIncorrect: true,
+
+    // test number - incorrect email
+    numberIncorrect: 1000,
+  },
+  password: {
+    correct: 'test',
+  },
+  passwordCheck: {
+    correct: 'test',
+    incorrect: 'Test',
+  },
+};
+
 describe('[POST] /signup endpoint', () => {
-  // check up variables
-  const checkUps = {
-    email: {
-      // correct and incorrect email
-      incorrect: 'test',
-      correct: 'test@test.com',
-
-      // correct and duplicate email with uppercase
-      uppercaseDuplicate: 'Test@test.com',
-      uppercaseCorrect: 'Test2@test.com',
-
-      // whitespace correct and duplicate
-      whitespaceDuplicate: '  Test@test.com  ',
-      whitespaceCorrect: '    Test3@test.com   ',
-
-      // test inner whitespace - incorrect email
-      innerWhitespaceIncorrect: 'test @gm ail.com',
-
-      // test boolean - incorrect email
-      booleanIncorrect: true,
-
-      // test number - incorrect email
-      numberIncorrect: 1000,
-    },
-    password: {
-      correct: 'test',
-    },
-    passwordCheck: {
-      correct: 'test',
-      incorrect: 'Test',
-    },
-  };
-
-  it('must return 404 on get request', async () => {
-    const res = await request(global.app.getHttpServer())
-      .get(`${global.prefix}/signup`)
-      .send();
-    expect(res.status).toBe(404);
-    expect(res.body.statusCode).toBe(404);
-    // res.body.should.have.property('success').eq(false);
-    // res.body.should.have.property('type').eq('endpoint');
-  });
-
   it('should return errors without any data sent', async () => {
     const data = {};
     const res = await request(global.app.getHttpServer())

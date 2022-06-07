@@ -32,7 +32,7 @@ But how about we prepare PostgreSQL instance running at docker?
 
 First, create directory `docker/envs/devicer-dev`. Here we will store our docker files.
 
-Now, create `docker/envs/devicer-dev.env` file. Docker-composer will catch variables from this file.
+Now, create `docker/envs/devicer-dev.env` file. Docker-compose will catch variables from this file.
 
 Contents of `.env` file.
 ```
@@ -283,11 +283,11 @@ And the last thing. Install `cross-env` via command:
 
 Edit `package.json`. Find:
 
-`"start:dev": "nest start --watch",`
+`"start:dev": "nest start --watch"`
 
 and change it with:
  
-`"start:dev": "cross-env NODE_ENV=dev nest start --watch",`
+`"start:dev": "cross-env NODE_ENV=dev nest start --watch"`
 
 `cross-env` helps us to pass environment variables to the executable at any operating system.
 

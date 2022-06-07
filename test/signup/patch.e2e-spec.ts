@@ -7,7 +7,5 @@ describe('[PATCH] /signup endpoint', () => {
       .send();
     expect(res.status).toBe(404);
     expect(res.body.statusCode).toBe(404);
-    // res.body.should.have.property('success').eq(false);
-    // res.body.should.have.property('type').eq('endpoint');
   });
 });
