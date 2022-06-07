@@ -544,7 +544,7 @@ export class SignupModule {}
 
 Now we need custom validator that will check that passwords are equal.
 
-Create file `src/modules/signup/validators/match.validators.ts`:
+Create file `src/base/validators/match.validators.ts`:
 
 ```typescript
 import {
@@ -585,7 +585,7 @@ Now we must add this validator to the `src/modules/singup/dto/signupUser.validat
 ```typescript
 import { IsEmail, IsNotEmpty, Validate } from 'class-validator';
 import { UserEmailUniqueValidator } from '../validators/UserEmailUnique.validator';
-import { MatchValidator } from '../validators/match.validator';
+import { MatchValidator } from '../../../base/validators/match.validator';
 
 export class SignupUserValidatorDto {
   @UserEmailUniqueValidator()

@@ -1,5 +1,4 @@
 import * as request from 'supertest';
-import exp from 'constants';
 
 describe('[POST] /signup endpoint', () => {
   // check up variables
@@ -253,86 +252,207 @@ describe('[POST] /signup endpoint', () => {
     expect(res.status).toBe(201);
     expect(res.body).toBeObject();
     expect(res.body).toHaveProperty('email');
+    expect(res.body.email).toBe(checkUps.email.correct);
   });
 
-  /*
-  it('user data must be correct', (done) => {
-    app.models.User.findOne({email: 'test@test.com'}).exec().then((user) => {
-      user._id.should.exist;
-      user.email.should.exist.eq('test@test.com');
-      user.username.should.exist.eq('jasonhound');
-      done();
-    });
+  it('user must exist in the database', async () => {
+    const user = await global.appModule
+      .get('UserRepository')
+      .findOneBy({ email: checkUps.email.correct });
+    expect(user).not.toBeNull();
+    expect(user).toHaveProperty('email');
+    expect(user).toHaveProperty('emailOriginal');
+    expect(user).toHaveProperty('password');
+    expect(user.email).toBe(checkUps.email.correct);
+    expect(user.emailOriginal).toBe(checkUps.email.correct);
   });
 
-  it('should return success if everything is correct - check trim()', (done) => {
-    const data = {username: '    jhound    ', email: '     test2@test.com      '};
-    chai.request(app.server)
-    .post(`${options.apiPrefix}/users/signup`)
-    .send(data)
-    .end((err, res) => {
-      res.should.have.status(200);
-      res.body.should.have.property('token');
-      res.body.should.have.property('refreshToken');
-      done();
-    });
+  it('should return error if user exists', async () => {
+    const data = {
+      email: checkUps.email.uppercaseDuplicate,
+      password: checkUps.password.correct,
+      passwordCheck: checkUps.passwordCheck.correct,
+    };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(422);
+    expect(res.body.statusCode).toBe(422);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBeInstanceOf(Array);
+
+    // should not return error with property email
+    expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'email',
+        constraints: expect.toContainKey('UserEmailUnique'),
+      },
+    ]);
+
+    // should not return error for property 'password'
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'password',
+      },
+    ]);
+
+    // should not return error for property 'passwordCheck'
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'passwordCheck',
+      },
+    ]);
   });
 
-  it('user data must be correct', (done) => {
-    app.models.User.findOne({email: 'test2@test.com'}).exec().then((user) => {
-      user._id.should.exist;
-      user.email.should.exist.eq('test2@test.com');
-      user.username.should.exist.eq('jhound');
-      done();
-    });
+  it('should sign up another user', async () => {
+    const data = {
+      email: checkUps.email.uppercaseCorrect,
+      password: checkUps.password.correct,
+      passwordCheck: checkUps.passwordCheck.correct,
+    };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+
+    expect(res.status).toBe(201);
+    expect(res.body).toBeObject();
+    expect(res.body).toHaveProperty('email');
+    expect(res.body.email).toBe(checkUps.email.uppercaseCorrect.toLowerCase());
   });
 
-  it('should return error because user with this username already exists', (done) => {
-    const data = {username: 'jhound'};
-    chai.request(app.server)
-    .post(`${options.apiPrefix}/users/signup`)
-    .send(data)
-    .end((err, res) => {
-      res.should.have.status(422);
-      res.body.should.have.property('success').eq(false);
-      res.body.should.have.property('code').eq(422);
-      res.body.should.have.property('errors');
-      res.body.errors.should.be.a('array');
-      res.body.errors.should.containSubset([{code: 2, param: 'username'}]);
-      done();
-    });
+  it('new user must exist in the database', async () => {
+    const checkedEmail = checkUps.email.uppercaseCorrect.toLowerCase();
+    const user = await global.appModule
+      .get('UserRepository')
+      .findOneBy({ email: checkedEmail });
+    expect(user).not.toBeNull();
+    expect(user).toHaveProperty('email');
+    expect(user).toHaveProperty('emailOriginal');
+    expect(user).toHaveProperty('password');
+    expect(user.email).toBe(checkedEmail);
+    expect(user.emailOriginal).toBe(checkUps.email.uppercaseCorrect);
   });
 
-  it('should return error because user with this username already exists - check camelCase', (done) => {
-    const data = {username: 'Jhound'};
-    chai.request(app.server)
-    .post(`${options.apiPrefix}/users/signup`)
-    .send(data)
-    .end((err, res) => {
-      res.should.have.status(422);
-      res.body.should.have.property('success').eq(false);
-      res.body.should.have.property('code').eq(422);
-      res.body.should.have.property('errors');
-      res.body.errors.should.be.a('array');
-      res.body.errors.should.containSubset([{code: 2, param: 'username'}]);
-      done();
-    });
+  it('should return error if user exists (whitspace check)', async () => {
+    const data = {
+      email: checkUps.email.whitespaceDuplicate,
+      password: checkUps.password.correct,
+      passwordCheck: checkUps.passwordCheck.correct,
+    };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(422);
+    expect(res.body.statusCode).toBe(422);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBeInstanceOf(Array);
+
+    // should not return error with property email
+    expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'email',
+        constraints: expect.toContainKey('UserEmailUnique'),
+      },
+    ]);
+
+    // should not return error for property 'password'
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'password',
+      },
+    ]);
+
+    // should not return error for property 'passwordCheck'
+    expect(res.body.message).not.toIncludeAllPartialMembers([
+      {
+        property: 'passwordCheck',
+      },
+    ]);
   });
 
-  it('should return error because email already exists - check camelCase', (done) => {
-    const data = {username: 'jasonhound1', email: 'Test@test.com'};
-    chai.request(app.server)
-    .post(`${options.apiPrefix}/users/signup`)
-    .send(data)
-    .end((err, res) => {
-      res.should.have.status(422);
-      res.body.should.have.property('success').eq(false);
-      res.body.should.have.property('code').eq(422);
-      res.body.should.have.property('errors');
-      res.body.errors.should.be.a('array');
-      res.body.errors.should.containSubset([{code: 4, param: 'email'}]);
-      done();
-    });
+  it('should sign up another user', async () => {
+    const data = {
+      email: checkUps.email.whitespaceCorrect,
+      password: checkUps.password.correct,
+      passwordCheck: checkUps.passwordCheck.correct,
+    };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+
+    expect(res.status).toBe(201);
+    expect(res.body).toBeObject();
+    expect(res.body).toHaveProperty('email');
+    expect(res.body.email).toBe(checkUps.email.whitespaceCorrect.toLowerCase().trim());
   });
-  */
+
+  it('new user must exist in the database', async () => {
+    const checkedEmail = checkUps.email.whitespaceCorrect.toLowerCase().trim();
+    const user = await global.appModule
+      .get('UserRepository')
+      .findOneBy({ email: checkedEmail });
+    expect(user).not.toBeNull();
+    expect(user).toHaveProperty('email');
+    expect(user).toHaveProperty('emailOriginal');
+    expect(user).toHaveProperty('password');
+    expect(user.email).toBe(checkedEmail);
+    expect(user.emailOriginal).toBe(checkUps.email.whitespaceCorrect);
+  });
+
+  it('should return errors if email in wrong format (inner whitespace)', async () => {
+    const data = { email: checkUps.email.innerWhitespaceIncorrect };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(422);
+    expect(res.body.statusCode).toBe(422);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBeInstanceOf(Array);
+
+    // error for property 'email' with constraints 'isEmail'
+    expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'email',
+        constraints: expect.toContainKey('isEmail'),
+      },
+    ]);
+  });
+
+  it('should return errors if email in wrong format (boolean)', async () => {
+    const data = { email: checkUps.email.booleanIncorrect };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(422);
+    expect(res.body.statusCode).toBe(422);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBeInstanceOf(Array);
+
+    // error for property 'email' with constraints 'isEmail'
+    expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'email',
+        constraints: expect.toContainKey('isEmail'),
+      },
+    ]);
+  });
+
+  it('should return errors if email in wrong format (number)', async () => {
+    const data = { email: checkUps.email.numberIncorrect };
+    const res = await request(global.app.getHttpServer())
+      .post(`${global.prefix}/signup`)
+      .send(data);
+    expect(res.status).toBe(422);
+    expect(res.body.statusCode).toBe(422);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBeInstanceOf(Array);
+
+    // error for property 'email' with constraints 'isEmail'
+    expect(res.body.message).toIncludeAllPartialMembers([
+      {
+        property: 'email',
+        constraints: expect.toContainKey('isEmail'),
+      },
+    ]);
+  });
 });

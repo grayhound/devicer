@@ -19,7 +19,7 @@ dotenv.config();
 /**
  * Setup test application
  */
-async function setupTestApplication(): Promise<INestApplication> {
+async function setupTestApplication() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
@@ -50,14 +50,15 @@ async function setupTestApplication(): Promise<INestApplication> {
   await app.listen(configService.get('api').port);
   await app.init();
 
-  return app;
+  global.app = app;
+  global.appModule = moduleFixture;
 }
 
 /**
  * Setup globals to use in tests.
  */
 beforeAll(async () => {
-  global.app = await setupTestApplication(); // application itself
+  await setupTestApplication(); // application itself
   global.prefix = '/v1'; // REST api endpoints urls prefix
 });
 

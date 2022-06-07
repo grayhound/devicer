@@ -15,7 +15,7 @@ const config = {
 
   migrationsTableName: 'migrations',
 
-  migrations: ['dist/src/migrations/*{.ts,.js}'],
+  migrations: ['dist/migrations/*{.ts,.js}'],
 };
 
 export default config;
