@@ -396,7 +396,7 @@ describe('[POST] /signup endpoint', () => {
     expect(user).toHaveProperty('emailOriginal');
     expect(user).toHaveProperty('password');
     expect(user.email).toBe(checkedEmail);
-    expect(user.emailOriginal).toBe(checkUps.email.whitespaceCorrect);
+    expect(user.emailOriginal).toBe(checkUps.email.whitespaceCorrect.trim());
   });
 
   it('should return errors if email in wrong format (inner whitespace)', async () => {
