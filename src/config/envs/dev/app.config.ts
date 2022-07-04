@@ -17,6 +17,8 @@ export default () => ({
 
   jwt: {
     secret: process.env.DEVICER_JWT_SECRET || 'somerandomjwtsecret',
-    expiresIn: process.env.DEVICER_JWT_EXPIRES_IN || '30m',
+    signOptions: {
+      expiresIn: process.env.DEVICER_JWT_EXPIRES_IN || '30m',
+    },
   },
 });

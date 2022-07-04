@@ -416,12 +416,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UserModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('jwt').secret,
-        signOptions: {
-          expiresIn: configService.get('jwt').expiresIn,
-        },
-      }),
+      useFactory: (config: ConfigService) => config.get('jwt'),
       inject: [ConfigService],
     }),
   ],
@@ -460,7 +455,9 @@ export default () => ({
 
   jwt: {
     secret: process.env.DEVICER_JWT_SECRET || 'somerandomjwtsecret',
-    expiresIn: process.env.DEVICER_JWT_EXPIRES_IN || '30m',
+    signOptions: {
+      expiresIn: process.env.DEVICER_JWT_EXPIRES_IN || '30m',
+    },
   },
 });
 ```
@@ -489,7 +486,9 @@ export default () => ({
 
   jwt: {
     secret: process.env.DEVICER_JWT_SECRET || 'somerandomjwtsecret',
-    expiresIn: process.env.DEVICER_JWT_EXPIRES_IN || '30m',
+    signOptions: {
+      expiresIn: process.env.DEVICER_JWT_EXPIRES_IN || '30m',
+    },
   },
 });
 ```
@@ -529,7 +528,9 @@ DEVICER_JWT_SECRET=Qy6sVDHTwUq25LPkeYtpub2eEHDvTq8NYcx7ch3PUdXM7MBVe3EyV4h2G7fQ8
 DEVICER_JWT_EXPIRES_IN=30m
 ```
 
-> Never expose your secret keys in production! Remember - this is just a tutorial.
+> Never expose your secret keys in production! Always generate new ones for each project! 
+>
+> Remember - this is just a tutorial.
 
 Now you can send `email` and `password` as JSON to the `/v1/auth` endpoint.
 
@@ -550,10 +551,99 @@ If user exists and password is correct, you will recieve correct response with J
 }
 ```
 
-## Implement JWT
+## Implement JWT and create `profile` endpoint.
 
 User can request token and we can check this token on other endpoints.
 
 Lets create and easy one - `profile`. We will just authenticate user via JWT and return profile information. In this case - just email and originalEmail will be enough.
 
+We need to create `Profile` module:
+
+`nest g module modules/profile`
+`nest g controller modules/profile`
+`nest g service modules/profile` 
+
+Now we need to create a `Strategy` for JWT. This will be an @Injectable() that we will use with controller.
+
+Creat file `src/modules/auth/strategy/jwt.strategy.ts`:
+
+```typescript
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),      
+      secretOrKey: configService.get('jwt').secret,
+    });
+  }
+
+  async validate(payload: any) {
+    return { userId: payload.sub, email: payload.email };
+  }
+}
+```
+Don't forget to import `ConfigModule` inside `AuthModule`. Otherwise we won't be able to use `ConfigService`.
+
+And we also need to use new `JwtStrategy` provider.
+
+```typescript
+...
+
+@Module({
+  imports: [
+    UserModule,
+    ConfigModule,
+    ...
+  ],
+  ...
+  providers: [AuthService, JwtStrategy],
+  ...
+})
+export class AuthModule {}
+```
+
+And we are almost ready. Just need to edit `ProfileController`:
+
+```typescript
+import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from '../user/entities/user.entity';
+
+@Controller('profile')
+export class ProfileController {
+  @UseGuards(AuthGuard('jwt'))
+  @Get('')
+  getProfile(@Request() req): User {
+    return req.user;
+  }
+}
+```
+
+Now all you need is to GET `/v1/profile` endpoint and provide `Authorization: Bearer %jwt%` header.
+
+You can do it with `Postman`. In case of curl request will look like this:
+
+`curl http://localhost:3000/v1/profile -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2Vybm..."
+
+You will get this response:
+
+```json
+{
+    "userId": "66b64af6-dcb6-4d7d-b438-629181e756a6",
+    "email": "a@a.com"
+}
+```
+
+If there's no token or token is wrong or expired a 401 error will be returned.
+
+With this you will be able to add this strategy to any other endpoint that requires user to be authenticated.
+
+## Covering with tests.
+
+You can skip this part, but I still highly recommend to run through it.
 
