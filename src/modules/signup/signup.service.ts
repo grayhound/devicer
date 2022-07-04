@@ -1,27 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { SignupUserValidatorDto } from './dto/signupUser.validator.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
 import { SignupUserSaveDto } from './dto/signupUser.save.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { SignupUserResultDto } from './dto/signupUser.result.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class SignupService {
-  constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {}
-
-  /**
-   * Find user by email.
-   *
-   * @param email
-   */
-  async findUserByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({ email });
-    return user;
-  }
+  constructor(private readonly userService: UserService) {}
 
   /**
    * Signup user.
@@ -43,7 +29,7 @@ export class SignupService {
     );
 
     // finally we can save user!
-    const user = await this.userRepository.save(signupUserSaveDto);
+    const user = await this.userService.userRepository.save(signupUserSaveDto);
 
     return user;
   }

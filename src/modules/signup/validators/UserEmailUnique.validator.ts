@@ -6,8 +6,8 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
-import { SignupService } from '../signup.service';
 import normalizeEmail from 'validator/lib/normalizeEmail';
+import { UserService } from '../../user/user.service';
 
 export function UserEmailUniqueValidator(
   validationOptions?: ValidationOptions,
@@ -25,14 +25,14 @@ export function UserEmailUniqueValidator(
 @ValidatorConstraint({ name: 'UserEmailUnique', async: true })
 @Injectable()
 export class UserEmailUniqueConstraint implements ValidatorConstraintInterface {
-  constructor(private signupService: SignupService) {}
+  constructor(private userService: UserService) {}
 
   async validate(value: string) {
     // normalize email first
     const normalizedEmail = normalizeEmail(value);
 
     // find user with this email
-    const user = await this.signupService.findUserByEmail(normalizedEmail);
+    const user = await this.userService.findUserByEmail(normalizedEmail);
 
     // if user exists - return false
     if (user) {

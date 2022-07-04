@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { SignupController } from './signup.controller';
 import { SignupService } from './signup.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
 import { UserEmailUniqueConstraint } from './validators/UserEmailUnique.validator';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [UserModule],
   controllers: [SignupController],
   providers: [SignupService, UserEmailUniqueConstraint],
 })

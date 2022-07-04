@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
 import { SignupModule } from './modules/signup/signup.module';
 import { loadAppConfig } from './config/loadAppConfig';
+import { AuthModule } from './modules/auth/auth.module';
 
 const config = loadAppConfig(process.env.NODE_ENV);
 
@@ -21,6 +22,7 @@ const config = loadAppConfig(process.env.NODE_ENV);
     }),
     UserModule,
     SignupModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

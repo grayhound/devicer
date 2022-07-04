@@ -24,8 +24,8 @@ export function MatchValidator(
         },
         defaultMessage(args: ValidationArguments) {
           return `'${args.property}' field doesn't match '${args.constraints[0]}'`;
-        }
-      }
+        },
+      },
     });
   };
 }
