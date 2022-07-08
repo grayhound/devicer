@@ -23,6 +23,7 @@ export const SignupCheckups = {
   },
   password: {
     correct: 'test',
+    incorrect: 'Test',
   },
   passwordCheck: {
     correct: 'test',

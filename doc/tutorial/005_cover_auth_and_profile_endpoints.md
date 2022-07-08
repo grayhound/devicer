@@ -399,4 +399,386 @@ And run the tests again! You must be sure test are running!
 
 > Are we there yet?
 
+Now, we can use those checkups for `auth` endpoint tests too!
 
+Just edit `test/auth/post.test.ts`:
+
+```typescript
+import * as request from 'supertest';
+import { SignupCheckups } from '../_data/signup.checkups';
+
+export const AuthPostTest = () => {
+  const checkUps = SignupCheckups;
+  describe('[POST] /auth endpoint', () => {
+
+  });
+};
+
+```
+
+And now for the test themselves! 
+
+Don't forget to write those tests inside `describe` block.
+
+First test - no data. We should get errors with 422 status code.
+
+With this test we will check first two items - `email` and `password` fields are empty.
+
+```typescript
+    it('should return errors without any data sent', async () => {
+      const data = {};
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // error for property 'email' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'email',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+
+      // error for property 'password' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'password',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+    });
+```
+
+Now we checkups if email is incorrect format:
+
+```typescript
+    it('should return errors if email in wrong format', async () => {
+      const data = { email: checkUps.email.incorrect };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeInstanceOf(Array);
+
+      // should not get error for property 'email' with contrainsts 'isNotEmpty'
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'email',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+
+      // error for property 'email' with constraints 'isEmail'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'email',
+          constraints: expect.toContainKey('isEmail'),
+        },
+      ]);
+
+      // error for property 'password' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'password',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+    });
+```
+
+Now we checkup if email is correct but there's no password:
+
+```typescript
+    it('should not return email error if email is in correct format', async () => {
+      const data = { email: checkUps.email.correct };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeInstanceOf(Array);
+
+      // should not return error with property email
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'email',
+        },
+      ]);
+
+      // error for property 'password' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'password',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+    });
+```
+
+Now, let's try to authenticate user:
+
+```typescript
+    it('should authenticate user if everything is correct', async () => {
+      const data = {
+        email: checkUps.email.correct,
+        password: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(201);
+      expect(res.body).toBeObject();
+      expect(res.body).toHaveProperty('token');
+    });
+```
+
+How about test a user with wrong password? We should get 401 error.
+
+For this one, we need to extend `signup.checkups.ts`:
+
+```typescript
+  ...
+  password: {
+    correct: 'test',
+    incorrect: 'Test',
+  },
+  ...
+```
+
+Password differs 'cause it's uppercase. And that's wrong password.
+
+Now the test:
+
+```typescript
+    it('should not authenticate user with wrong password', async () => {
+      const data = {
+        email: checkUps.email.correct,
+        password: checkUps.password.incorrect,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(401);
+    });
+```
+
+Now for case where email is uppercase (damn it's kind of poetry). It should authenticate:
+
+```typescript
+    it('should authenticate user even if email is Uppercase', async () => {
+      const data = {
+        email: checkUps.email.uppercaseCorrect,
+        password: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(201);
+      expect(res.body).toBeObject();
+      expect(res.body).toHaveProperty('token');
+    });
+```
+
+And the last case. For some reason user pressed space button trying to enter email:
+
+```typescript
+    it('should authenticate user even if email is with whitespaces', async () => {
+      const data = {
+        email: checkUps.email.whitespaceCorrect,
+        password: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(201);
+      expect(res.body).toBeObject();
+      expect(res.body).toHaveProperty('token');
+    });
+```
+
+And now run the tests!
+
+`npm run test:e2e`
+
+√ 32 passed, 32 total!
+
+> You may ask why the hell I'm wasting so much time for testing?
+>
+> Because coding without testing will have its effects sooner or later.
+>
+> Oh, and you will know. Even one line of code can destroy everything. 
+> 
+> It's better to be sure that your code works.
+>
+> In this case it's not even unit testing. It's end-to-end testing. These tests know nothing about your code.
+>
+> These tests see code like a `BLACKBOX`. Which is good. Blackbox is really good. You know nothing about your or any other developer code except what's written on the box.
+>
+> You just follow instructions and try to test what you see.
+>
+> One you open the box - it's Pandora's Box. Unfortunately you will have to open some of those boxes.
+>
+> But before that - follow the instruction on the box. If it says - don't open - you don't open.
+>
+> It says `auth` endpoint needs these parameters to be send - you send them and try to test them is various ways.
+
+ ## Profile
+ 
+ Are we missing something? Yep, that's `profile` endpoint. Two easy tests. 
+ 
+ - We need to checkup if `profile` send 401 error if we are not authenticated.
+ - We need to checkup that `profile` returns data if we send correct token.
+ 
+ Let's do it!
+ 
+ Just copy `auth` to `profile` directory. And remove all tests from `post.test.ts`. Just leave a checkup that `profile` doesn't respond to POST:
+ 
+ ```typescript
+import * as request from 'supertest';
+
+export const ProfilePostTest = () => {
+  describe('[POST] /profile endpoint', () => {
+    it('must return 404 on get request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .delete(`${global.prefix}/profile`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+};
+```
+
+Don't forget to rename `auth.test.ts` to `profile.test.ts`. 
+
+And don't forget to rename methods from `Auth*Test` to `Profile*Test` and `/auth` to `/profile`.
+
+Our files inside `profile` dir should look like this:
+
+`delete.test.ts`:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfileDeleteTest = () => {
+  describe('[DELETE] /profile endpoint', () => {
+    it('must return 404 on get request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .delete(`${global.prefix}/profile`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+};
+```
+
+`get.test.ts`, it's without tests for now:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfileGetTest = () => {
+  describe('[GET] /profile endpoint', () => {
+  });
+};
+```
+
+`patch.test.ts`:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfilePatchTest = () => {
+  describe('[PATCH] /profile endpoint', () => {
+    it('must return 404 on get request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .patch(`${global.prefix}/profile`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+}
+```
+
+`post.test.ts`:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfilePostTest = () => {
+  describe('[POST] /profile endpoint', () => {
+    it('must return 404 on get request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+};
+```
+
+`put.test.ts`:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfilePutTest = () => {
+  describe('[PUT] /profile endpoint', () => {
+    it('must return 404 on get request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .put(`${global.prefix}/profile`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+}
+```
+
+And now `profile.test.ts`:
+
+```typescript
+import { ProfileDeleteTest } from './delete.test';
+import { ProfileGetTest } from './get.test';
+import { ProfilePatchTest } from './patch.test';
+import { ProfilePutTest } from './put.test';
+import { ProfilePostTest } from './post.test';
+
+export const ProfileTests = {
+  delete: ProfileDeleteTest,
+  get: ProfileGetTest,
+  patch: ProfilePatchTest,
+  put: ProfilePutTest,
+  post: ProfilePostTest,
+};
+```
+
+Now we need to add those tests to the `app.e2e-spec.ts`:
+
+
+```typescript
+...
+import { ProfileTests } from './profile/profile.tests';
+
+...
+
+describe('ProfileTests', () => {
+  describe('ProfileGetTest', ProfileTests.get);
+  describe('ProfilePostTest', ProfileTests.post);
+  describe('ProfileDeleteTest', ProfileTests.delete);
+  describe('ProfilePatchTest', ProfileTests.patch);
+  describe('ProfilePutTest', ProfileTests.put);
+});
+
+```
