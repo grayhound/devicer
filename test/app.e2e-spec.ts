@@ -1,4 +1,5 @@
 import * as request from 'supertest';
+import { SignupTests } from './signup/signup.tests';
 
 describe('Tests', () => {
   it('/ (GET)', () => {
@@ -7,4 +8,12 @@ describe('Tests', () => {
       .expect(200)
       .expect('Hello World!');
   });
+});
+
+describe('SignupTests', () => {
+  describe('SignupGetTest', SignupTests.get);
+  describe('SignupPostTest', SignupTests.post);
+  describe('SignupDeleteTest', SignupTests.delete);
+  describe('SignupPatchTest', SignupTests.patch);
+  describe('SignupPutTest', SignupTests.put);
 });

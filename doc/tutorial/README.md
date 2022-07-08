@@ -38,9 +38,11 @@ In this tutorial we will use:
 2. [Create REST API endpoints to signup user](002_create_rest_api_endpoints_to_signup_user.md)
 3. [Cover REST API endpoints with end-to-end tests](003_cover_rest_api_endpoints_with_tests.md)
 4. [Create REST API authentication via JWT (JSON Web Token)](004_create_rest_api_authentication_jwt.md)
-5. Create endpoints to add, view, edit and delete devices. This will also include generating auth token for devices.
-6. Create MQTT receiver. This will be different application/micro-service that will communcate with base apllication/microservice.
-7. Create REST API endpoints to show data for Devices.
+5. [Cover `auth` and `profile` endpoints](005_cover_auth_and_profile_endpoints.md)
+6. [Create REST API endpoint - change password](006_create_rest_api_change_password.md)
+7. Create endpoints to add, view, edit and delete devices. This will also include generating auth token for devices.
+8. Create MQTT receiver. This will be different application/micro-service that will communcate with base apllication/microservice.
+9. Create REST API endpoints to show data for Devices.
 
 ### Frontend
 1. Prepare frontend application

@@ -634,7 +634,7 @@ You will get this response:
 
 ```json
 {
-    "userId": "66b64af6-dcb6-4d7d-b438-629181e756a6",
+    "id": "66b64af6-dcb6-4d7d-b438-629181e756a6",
     "email": "a@a.com"
 }
 ```
@@ -642,8 +642,3 @@ You will get this response:
 If there's no token or token is wrong or expired a 401 error will be returned.
 
 With this you will be able to add this strategy to any other endpoint that requires user to be authenticated.
-
-## Covering with tests.
-
-You can skip this part, but I still highly recommend to run through it.
-
