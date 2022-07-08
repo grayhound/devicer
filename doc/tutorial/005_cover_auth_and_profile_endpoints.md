@@ -681,16 +681,19 @@ export const ProfileDeleteTest = () => {
 };
 ```
 
-`get.test.ts`, it's without tests for now:
+`get.test.ts`, it's without tests for now, but we already connected the checkups:
 
 ```typescript
 import * as request from 'supertest';
+import { SignupCheckups } from '../_data/signup.checkups';
 
 export const ProfileGetTest = () => {
-  describe('[GET] /profile endpoint', () => {
-  });
+  const checkUps = SignupCheckups;
+  let token;
 };
 ```
+
+As you can see we have `token` variable. We will use it later too.
 
 `patch.test.ts`:
 
@@ -780,5 +783,63 @@ describe('ProfileTests', () => {
   describe('ProfilePatchTest', ProfileTests.patch);
   describe('ProfilePutTest', ProfileTests.put);
 });
-
 ```
+
+Now we need to extend `test/profile/get.test.ts`.
+
+Remember - add those test inside `describe`. First test tries to get to `profile` without any token.
+
+It will get 401.
+
+```typescript
+    it('must return 401 without token', async () => {
+      const res = await request(global.app.getHttpServer())
+        .get(`${global.prefix}/profile`)
+        .send();
+      expect(res.status).toBe(401);
+    });
+```
+
+Next two tests will authenticate user and try to get to profile.
+
+First test to get authenticate:
+
+```typescript
+    it('should authenticate user if everything is correct', async () => {
+      const data = {
+        email: checkUps.email.correct,
+        password: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(201);
+      expect(res.body).toBeObject();
+      expect(res.body).toHaveProperty('token');
+      token = res.body.token;
+    });
+```
+
+Now we have `token` variable filled. Let's try to get that profile!
+
+```typescript
+    it('should get a profile', async () => {
+      const res = await request(global.app.getHttpServer())
+        .get(`${global.prefix}/profile`)
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+      expect(res.status).toBe(200);
+      expect(res.body).toBeObject();
+      expect(res.body).toHaveProperty('id');
+      expect(res.body).toHaveProperty('email');
+      expect(res.body.email).toBe(checkUps.email.correct);
+    });
+```
+
+Here we send `Authorization` header that looks like `Bearer %token%`.
+
+If everything is ok all tests should pass.
+
+What's next? How about we will make an endpoint that will change authenticated user password?
+
+And yes, we will cover it with tests.
