@@ -317,6 +317,7 @@ export class ProfileController {
   @InjectUserToBody()
   @UseGuards(AuthGuard('jwt'))
   @Post('changePassword')
+  @HttpCode(200)
   async changePassword(
     @Body() changePasswordValidatorDto: ProfileChangePasswordValidatorDto,
     @Request() req,
@@ -408,7 +409,7 @@ And now `profile/changePassword` endpoint is ready!
 
 Again? Yes again! Again and again! We are going to make these tests:
 
-- Check that `changePassword` cannot be access without JWT.
+- Check that `changePassword` cannot be accessed without JWT.
 - Authenticate user.
 - Send empty data.
 - Send incorrect `oldPassword`
@@ -540,4 +541,516 @@ describe('ProfileChangePasswordTests', () => {
 });
 ```
 
-And now to the 
+Add few additions to the `singup.checkups.ts`:
+
+```typescript
+  password: {
+    ...,
+    correctWithSpaces: ' test ',
+  },
+  ...
+  newPassword: {
+    correct: 'newPassword',
+    incorrect: 'newpassword',
+    correctWithSpaces: ' newPassword ',
+  },
+```
+
+And now to the `post.test.ts`. We will need `SignupCheckups` again.
+
+```typescript
+import * as request from 'supertest';
+import { SignupCheckups } from '../../_data/signup.checkups';
+
+export const ProfileChangePasswordPostTest = () => {
+  const checkUps = SignupCheckups;
+  let token;
+
+  describe('[POST] /profile/changePassword endpoint', () => {
+
+  });
+};
+```
+
++ Check that `changePassword` cannot be accessed without JWT.
+
+```typescript
+    it('must return 401 without token', async () => {
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .send();
+      expect(res.status).toBe(401);
+    });
+```
+
++ Authenticate user.
+
+```typescript
+    it('should authenticate user if everything is correct', async () => {
+      const data = {
+        email: checkUps.email.correct,
+        password: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(201);
+      expect(res.body).toBeObject();
+      expect(res.body).toHaveProperty('token');
+      token = res.body.token;
+    });
+```
+
++ Send empty data.
+
+```typescript
+    it('should return errors without any data sent', async () => {
+      const data = {};
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // error for property 'oldPassword' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+
+      // error for property 'newPassword' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPassword',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+
+      // error for property 'newPasswordCheck' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPasswordCheck',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+    });
+```
+
++ Send incorrect `oldPassword`
+
+```typescript
+    it('should return errors if `oldPassword` is incorrect', async () => {
+      const data = {
+        oldPassword: checkUps.password.incorrect,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // error for property 'oldPassword' with constraints 'UserPasswordCorrectValidatorConstraint'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+          constraints: expect.toContainKey(
+            'UserPasswordCorrectValidatorConstraint',
+          ),
+        },
+      ]);
+
+      // error for property 'newPassword' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPassword',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+
+      // error for property 'newPasswordCheck' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPasswordCheck',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+    });
+```
+
++ Send "correct" `oldPassword` but with spaces.
+
+```typescript
+    it('should return errors if `oldPassword` is "correct" but with spaces', async () => {
+      const data = {
+        oldPassword: checkUps.password.correctWithSpaces,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // error for property 'oldPassword' with constraints 'UserPasswordCorrectValidatorConstraint'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+          constraints: expect.toContainKey(
+            'UserPasswordCorrectValidatorConstraint',
+          ),
+        },
+      ]);
+    });
+```
+
++ Send correct `oldPassword`, but without `newPassword` and `newPasswordCheck`.
+
+```typescript
+    it('should return errors if `oldPassword` is correct but no `newPassword` and `newPasswordCheck`', async () => {
+      const data = {
+        oldPassword: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // there should be no errors for `oldPassword`
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+        },
+      ]);
+
+      // error for property 'newPassword' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPassword',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+
+      // error for property 'newPasswordCheck' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPasswordCheck',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+    });
+```
+
++ Send correct `oldPassword`, `newPassword` but not `newPasswordCheck`
+
+```typescript
+    it('should return errors if `oldPassword`, `newPassword` is present but not `newPasswordCheck`', async () => {
+      const data = {
+        oldPassword: checkUps.password.correct,
+        newPassword: checkUps.newPassword.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // there should be no errors for `oldPassword`
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+        },
+      ]);
+
+      // there should be no errors for 'newPassword'
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'newPassword',
+        },
+      ]);
+
+      // error for property 'newPasswordCheck' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPasswordCheck',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+    });
+```
+
++ Send correct `oldPassword`, `newPasswordCheck` but not `newPassword`
+
+But before that we need to fix `MatchValidator`! I found an error there!
+
+The thing is that there's no need to check match `newPasswordCheck` if `newPassword` is empty!
+
+Edit `src/base/validators/match.validator.ts`:
+
+```typescript
+import {
+  registerDecorator,
+  ValidationArguments,
+  ValidationOptions,
+} from 'class-validator';
+
+export function MatchValidator(
+  property: string,
+  constraintName?: string,
+  validationOptions?: ValidationOptions,
+) {
+  return (object: any, propertyName: string) => {
+    registerDecorator({
+      name: constraintName,
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      constraints: [property],
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          const [relatedPropertyName] = args.constraints;
+          const relatedValue = (args.object as any)[relatedPropertyName];
+          if (!relatedValue) {
+            return true;
+          }
+          return value === relatedValue;
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `'${args.property}' field doesn't match '${args.constraints[0]}'`;
+        },
+      },
+    });
+  };
+}
+```
+
+Take a look at lines:
+
+```typescript
+          if (!relatedValue) {
+            return true;
+          }
+```
+
+Yes, we just ignore this validator in this case.
+
+And now for the test:
+
+```typescript
+    it('should return errors if `oldPassword`, `newPasswordCheck` is present but not `newPassword`', async () => {
+      const data = {
+        oldPassword: checkUps.password.correct,
+        newPasswordCheck: checkUps.newPassword.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // there should be no errors for `oldPassword`
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+        },
+      ]);
+
+      // error for property 'newPassword' with constraints 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPassword',
+          constraints: expect.toContainKey('isNotEmpty'),
+        },
+      ]);
+
+      // there should be no errors for 'newPasswordCheck'
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'newPasswordCheck',
+        },
+      ]);
+    });
+```
+
++ Send correct `oldPassword`, `newPassword` but `newPasswordCheck` is not equal to `newPassword`.
+
+```typescript
+    it('should return errors if `oldPassword`, `newPassword` and `newPasswordCheck` sent but `newPassword` and `newPasswordCheck` are not equal.', async () => {
+      const data = {
+        oldPassword: checkUps.password.correct,
+        newPassword: checkUps.newPassword.correct,
+        newPasswordCheck: checkUps.newPassword.incorrect,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // there should be no errors for `oldPassword`
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+        },
+      ]);
+
+      // there should be no errors for 'newPassword'
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'newPassword',
+        },
+      ]);
+
+      // error for property 'newPasswordCheck' with constraint 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPasswordCheck',
+          constraints: expect.toContainKey('PasswordsMatch'),
+        },
+      ]);
+    });
+```
+
++ Send correct `oldPassword`, `newPassword` but `newPasswordCheck` is with spaces.
+
+```typescript
+    it('should return errors if `oldPassword`, `newPassword` and `newPasswordCheck` sent but `newPaswordCheck` with spaces', async () => {
+      const data = {
+        oldPassword: checkUps.password.correct,
+        newPassword: checkUps.newPassword.correct,
+        newPasswordCheck: checkUps.newPassword.correctWithSpaces,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(422);
+      expect(res.body.statusCode).toBe(422);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toBeArray();
+      expect(res.body.message).not.toBeEmpty();
+
+      // there should be no errors for `oldPassword`
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'oldPassword',
+        },
+      ]);
+
+      // there should be no errors for 'newPassword'
+      expect(res.body.message).not.toIncludeAllPartialMembers([
+        {
+          property: 'newPassword',
+        },
+      ]);
+
+      // error for property 'newPasswordCheck' with constraint 'isNotEmpty'
+      expect(res.body.message).toIncludeAllPartialMembers([
+        {
+          property: 'newPasswordCheck',
+          constraints: expect.toContainKey('PasswordsMatch'),
+        },
+      ]);
+    });
+```
+
++ Send correct `oldPassword`, `newPassword` and `newPasswordCheck`.
+
+```typescript
+    it('should change password with correct data', async () => {
+      const data = {
+        oldPassword: checkUps.password.correct,
+        newPassword: checkUps.newPassword.correct,
+        newPasswordCheck: checkUps.newPassword.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('message');
+    });
+```
+
++ Try to authenticate with old password.
+
+```typescript
+    it('should not authenticate with old password', async () => {
+      const data = {
+        email: checkUps.email.correct,
+        password: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(401);
+      token = res.body.token;
+    });
+```
+
++ Try to authenticate with new password.
+
+```typescript
+    it('should authenticate with new password', async () => {
+      const data = {
+        email: checkUps.email.correct,
+        password: checkUps.newPassword.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/auth`)
+        .send(data);
+      expect(res.status).toBe(201);
+      expect(res.body).toBeObject();
+      expect(res.body).toHaveProperty('token');
+      token = res.body.token;
+    });
+```
+
++ Change password back.
+
+```typescript
+    it('should change password back', async () => {
+      const data = {
+        oldPassword: checkUps.newPassword.correct,
+        newPassword: checkUps.password.correct,
+        newPasswordCheck: checkUps.password.correct,
+      };
+      const res = await request(global.app.getHttpServer())
+        .post(`${global.prefix}/profile/changePassword`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(data);
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('message');
+    });
+```
+
+ √ 57 passed, 57 total!

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, Post, Body } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Post, Body, HttpCode } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/entities/user.entity';
 import { ProfileChangePasswordValidatorDto } from './dto/profileChangePassword.validator.dto';
@@ -18,6 +18,7 @@ export class ProfileController {
   @InjectUserToBody()
   @UseGuards(AuthGuard('jwt'))
   @Post('changePassword')
+  @HttpCode(200)
   async changePassword(
     @Body() changePasswordValidatorDto: ProfileChangePasswordValidatorDto,
     @Request() req,

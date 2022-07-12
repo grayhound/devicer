@@ -24,9 +24,15 @@ export const SignupCheckups = {
   password: {
     correct: 'test',
     incorrect: 'Test',
+    correctWithSpaces: ' test ',
   },
   passwordCheck: {
     correct: 'test',
     incorrect: 'Test',
+  },
+  newPassword: {
+    correct: 'newPassword',
+    incorrect: 'newpassword',
+    correctWithSpaces: ' newPassword ',
   },
 };
