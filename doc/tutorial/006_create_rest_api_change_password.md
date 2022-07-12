@@ -405,3 +405,23 @@ export class TrimStringsPipe extends AbstractTransformPipe {
 And now `profile/changePassword` endpoint is ready!
 
 ## Testing
+
+Again? Yes again! Again and again! We are going to make these tests:
+
+- Check that `changePassword` cannot be access without JWT.
+- Authenticate user.
+- Send empty data.
+- Send incorrect `oldPassword`
+- Send "correct" `oldPassword` but with spaces.
+- Send correct `oldPassword`, but without `newPassword` and `newPasswordCheck`.
+- Send correct `oldPassword`, `newPassword` but not `newPasswordCheck`
+- Send correct `oldPassword`, `newPasswordCheck` but not `newPassword`
+- Send correct `oldPassword`, `newPassword` but `newPasswordCheck` is not equal to `newPassword`.
+- Send correct `oldPassword`, `newPassword` and `newPasswordCheck`.
+- Try to authenticate with old password.
+- Try to authenticate with new password.
+- Change password back.
+
+I recommend to make tests inside `test/profile/changePassword` directory. Tests structure should look like endpoints address structure.
+
+

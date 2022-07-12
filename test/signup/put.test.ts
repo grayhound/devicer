@@ -2,7 +2,7 @@ import * as request from 'supertest';
 
 export const SignupPutTest = () => {
   describe('[PUT] /signup endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on PUT request', async () => {
       const res = await request(global.app.getHttpServer())
         .put(`${global.prefix}/signup`)
         .send();

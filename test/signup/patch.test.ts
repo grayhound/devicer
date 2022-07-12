@@ -2,7 +2,7 @@ import * as request from 'supertest';
 
 export const SignupPatchTest = () => {
   describe('[PATCH] /signup endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on PATCH request', async () => {
       const res = await request(global.app.getHttpServer())
         .patch(`${global.prefix}/signup`)
         .send();

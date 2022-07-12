@@ -312,7 +312,7 @@ Create `test/signup/delete.e2e-spec.ts`:
 import * as request from 'supertest';
 
 describe('[DELETE] /signup endpoint', () => {
-  it('must return 404 on get request', async () => {
+  it('must return 404 on DELETE request', async () => {
     const res = await request(global.app.getHttpServer())
       .delete(`${global.prefix}/signup`)
       .send();
@@ -328,7 +328,7 @@ Create `test/signup/get.e2e-spec.ts`:
 import * as request from 'supertest';
 
 describe('[GET] /signup endpoint', () => {
-  it('must return 404 on get request', async () => {
+  it('must return 404 on GET request', async () => {
     const res = await request(global.app.getHttpServer())
       .get(`${global.prefix}/signup`)
       .send();
@@ -345,7 +345,7 @@ Create `test/signup/patch.e2e-spec.ts`:
 import * as request from 'supertest';
 
 describe('[PATCH] /signup endpoint', () => {
-  it('must return 404 on get request', async () => {
+  it('must return 404 on PATCH request', async () => {
     const res = await request(global.app.getHttpServer())
       .patch(`${global.prefix}/signup`)
       .send();
@@ -361,7 +361,7 @@ Create `test/signup/put.e2e-spec.ts`:
 import * as request from 'supertest';
 
 describe('[PUT] /signup endpoint', () => {
-  it('must return 404 on get request', async () => {
+  it('must return 404 on PUT request', async () => {
     const res = await request(global.app.getHttpServer())
       .put(`${global.prefix}/signup`)
       .send();

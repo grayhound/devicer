@@ -2,7 +2,7 @@ import * as request from 'supertest';
 
 export const SignupDeleteTest = () => {
   describe('[DELETE] /signup endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on DELETE request', async () => {
       const res = await request(global.app.getHttpServer())
         .delete(`${global.prefix}/signup`)
         .send();

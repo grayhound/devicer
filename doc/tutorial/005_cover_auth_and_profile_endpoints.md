@@ -58,7 +58,7 @@ import * as request from 'supertest';
 
 export const SignupDeleteTest = () => {
   describe('[DELETE] /signup endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on DELETE request', async () => {
       const res = await request(global.app.getHttpServer())
         .delete(`${global.prefix}/signup`)
         .send();
@@ -78,7 +78,7 @@ import * as request from 'supertest';
 
 export const SignupGetTest = () => {
   describe('[GET] /signup endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on GET request', async () => {
       const res = await request(global.app.getHttpServer())
         .get(`${global.prefix}/signup`)
         .send();
@@ -96,7 +96,7 @@ import * as request from 'supertest';
 
 export const SignupPatchTest = () => {
   describe('[PATCH] /signup endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on PATCH request', async () => {
       const res = await request(global.app.getHttpServer())
         .patch(`${global.prefix}/signup`)
         .send();
@@ -125,7 +125,7 @@ import * as request from 'supertest';
 
 export const SignupPutTest = () => {
   describe('[PUT] /signup endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on PUT request', async () => {
       const res = await request(global.app.getHttpServer())
         .put(`${global.prefix}/signup`)
         .send();
@@ -203,7 +203,7 @@ import * as request from 'supertest';
 
 export const AuthDeleteTest = () => {
   describe('[DELETE] /auth endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on DELETE request', async () => {
       const res = await request(global.app.getHttpServer())
         .delete(`${global.prefix}/auth`)
         .send();
@@ -221,7 +221,7 @@ import * as request from 'supertest';
 
 export const AuthGetTest = () => {
   describe('[GET] /auth endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on GET request', async () => {
       const res = await request(global.app.getHttpServer())
         .get(`${global.prefix}/auth`)
         .send();
@@ -239,7 +239,7 @@ import * as request from 'supertest';
 
 export const AuthPatchTest = () => {
   describe('[PATCH] /auth endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on PATCH request', async () => {
       const res = await request(global.app.getHttpServer())
         .patch(`${global.prefix}/auth`)
         .send();
@@ -646,7 +646,7 @@ import * as request from 'supertest';
 
 export const ProfilePostTest = () => {
   describe('[POST] /profile endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on POST request', async () => {
       const res = await request(global.app.getHttpServer())
         .delete(`${global.prefix}/profile`)
         .send();
@@ -670,7 +670,7 @@ import * as request from 'supertest';
 
 export const ProfileDeleteTest = () => {
   describe('[DELETE] /profile endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on DELETE request', async () => {
       const res = await request(global.app.getHttpServer())
         .delete(`${global.prefix}/profile`)
         .send();
@@ -702,7 +702,7 @@ import * as request from 'supertest';
 
 export const ProfilePatchTest = () => {
   describe('[PATCH] /profile endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on PATCH request', async () => {
       const res = await request(global.app.getHttpServer())
         .patch(`${global.prefix}/profile`)
         .send();
@@ -720,7 +720,7 @@ import * as request from 'supertest';
 
 export const ProfilePostTest = () => {
   describe('[POST] /profile endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on POST request', async () => {
       const res = await request(global.app.getHttpServer())
         .post(`${global.prefix}/profile`)
         .send();
@@ -738,7 +738,7 @@ import * as request from 'supertest';
 
 export const ProfilePutTest = () => {
   describe('[PUT] /profile endpoint', () => {
-    it('must return 404 on get request', async () => {
+    it('must return 404 on PUT request', async () => {
       const res = await request(global.app.getHttpServer())
         .put(`${global.prefix}/profile`)
         .send();
