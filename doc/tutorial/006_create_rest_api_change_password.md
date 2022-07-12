@@ -424,4 +424,120 @@ Again? Yes again! Again and again! We are going to make these tests:
 
 I recommend to make tests inside `test/profile/changePassword` directory. Tests structure should look like endpoints address structure.
 
+`delete.test.ts`:
 
+```typescript
+import * as request from 'supertest';
+
+export const ProfileChangePasswordDeleteTest = () => {
+  describe('[DELETE] /profile/changePassword endpoint', () => {
+    it('must return 404 on DELETE request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .delete(`${global.prefix}/profile/changePassword`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+};
+```
+
+`get.test.ts`:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfileChangePasswordGetTest = () => {
+  describe('[GET] /profile/changePassword endpoint', () => {
+    it('must return 404 on GET request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .delete(`${global.prefix}/profile/changePassword`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+};
+```
+
+`patch.test.ts`:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfileChangePasswordPatchTest = () => {
+  describe('[PATCH] /profile/changePassword endpoint', () => {
+    it('must return 404 on PATCH request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .patch(`${global.prefix}/profile/changePassword`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+}
+```
+
+`post.test.ts`, empty for now:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfileChangePasswordPostTest = () => {
+};
+```
+
+`put.test.js`:
+
+```typescript
+import * as request from 'supertest';
+
+export const ProfileChangePasswordPutTest = () => {
+  describe('[PUT] /profile/changePassword endpoint', () => {
+    it('must return 404 on PUT request', async () => {
+      const res = await request(global.app.getHttpServer())
+        .put(`${global.prefix}/profile/changePassword`)
+        .send();
+      expect(res.status).toBe(404);
+      expect(res.body.statusCode).toBe(404);
+    });
+  });
+}
+```
+
+`changePassword.test.ts`:
+
+```typescript
+import { ProfileChangePasswordDeleteTest } from './delete.test';
+import { ProfileChangePasswordGetTest } from './get.test';
+import { ProfileChangePasswordPatchTest } from './patch.test';
+import { ProfileChangePasswordPutTest } from './put.test';
+import { ProfileChangePasswordPostTest } from './post.test';
+
+export const ProfileChangePasswordTests = {
+  delete: ProfileChangePasswordDeleteTest,
+  get: ProfileChangePasswordGetTest,
+  patch: ProfileChangePasswordPatchTest,
+  put: ProfileChangePasswordPutTest,
+  post: ProfileChangePasswordPostTest,
+};
+```
+
+And connect those tests inside `app.e2e-spec.ts`:
+
+```typescript
+...
+import { ProfileChangePasswordTests } from './profile/changePassword/changePassword.tests';
+
+...
+
+describe('ProfileChangePasswordTests', () => {
+  describe('ProfileChangePasswordGetTest', ProfileChangePasswordTests.get);
+  describe('ProfileChangePasswordPostTest', ProfileChangePasswordTests.post);
+  describe('ProfileChangePasswordDeleteTest', ProfileChangePasswordTests.delete);
+  describe('ProfileChangePasswordPatchTest', ProfileChangePasswordTests.patch);
+  describe('ProfileChangePasswordPutTest', ProfileChangePasswordTests.put);
+});
+```
+
+And now to the 

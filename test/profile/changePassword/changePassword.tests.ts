@@ -4,7 +4,7 @@ import { ProfileChangePasswordPatchTest } from './patch.test';
 import { ProfileChangePasswordPutTest } from './put.test';
 import { ProfileChangePasswordPostTest } from './post.test';
 
-export const ChangePasswordTests = {
+export const ProfileChangePasswordTests = {
   delete: ProfileChangePasswordDeleteTest,
   get: ProfileChangePasswordGetTest,
   patch: ProfileChangePasswordPatchTest,

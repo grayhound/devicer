@@ -2,6 +2,7 @@ import * as request from 'supertest';
 import { SignupTests } from './signup/signup.tests';
 import { AuthTests } from './auth/auth.tests';
 import { ProfileTests } from './profile/profile.tests';
+import { ProfileChangePasswordTests } from './profile/changePassword/changePassword.tests';
 
 describe('Tests', () => {
   it('/ (GET)', () => {
@@ -34,4 +35,12 @@ describe('ProfileTests', () => {
   describe('ProfileDeleteTest', ProfileTests.delete);
   describe('ProfilePatchTest', ProfileTests.patch);
   describe('ProfilePutTest', ProfileTests.put);
+});
+
+describe('ProfileChangePasswordTests', () => {
+  describe('ProfileChangePasswordGetTest', ProfileChangePasswordTests.get);
+  describe('ProfileChangePasswordPostTest', ProfileChangePasswordTests.post);
+  describe('ProfileChangePasswordDeleteTest', ProfileChangePasswordTests.delete);
+  describe('ProfileChangePasswordPatchTest', ProfileChangePasswordTests.patch);
+  describe('ProfileChangePasswordPutTest', ProfileChangePasswordTests.put);
 });

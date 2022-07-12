@@ -2,7 +2,7 @@ import * as request from 'supertest';
 
 export const ProfileChangePasswordDeleteTest = () => {
   describe('[DELETE] /profile/changePassword endpoint', () => {
-    it('must return 404 on delete request', async () => {
+    it('must return 404 on DELETE request', async () => {
       const res = await request(global.app.getHttpServer())
         .delete(`${global.prefix}/profile/changePassword`)
         .send();
