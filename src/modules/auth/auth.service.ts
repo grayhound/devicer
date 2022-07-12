@@ -64,7 +64,7 @@ export class AuthService {
    * @param user
    * @param password
    */
-  async checkPassword(user: User, password: string) {
+  async checkPassword(user: User, password: string): Promise<boolean> {
     const result = await bcrypt.compare(password, user.password);
     return result;
   }

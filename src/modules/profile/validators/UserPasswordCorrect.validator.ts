@@ -1,49 +1,58 @@
+import { Injectable } from '@nestjs/common';
 import {
   registerDecorator,
-  ValidationArguments,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { Injectable } from '@nestjs/common';
+import { REQUEST_CONTEXT } from '../../../base/interceptors/inject.user.interceptor';
+import { ExtendedValidationArguments } from '../validators/extended.validation.arguments';
+import { AuthService } from '../../auth/auth.service';
 import { UserService } from '../../user/user.service';
+
+@ValidatorConstraint({ async: true })
+@Injectable()
+export class UserPasswordCorrectValidatorConstraint
+  implements ValidatorConstraintInterface
+{
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
+
+  async validate(password: string, args?: ExtendedValidationArguments) {
+    const requestUser = args?.object[REQUEST_CONTEXT].user;
+
+    if (!requestUser) {
+      return false;
+    }
+
+    const user = await this.userService.findUserById(requestUser.id);
+
+    const checkPassword = await this.authService.checkPassword(user, password);
+
+    if (!checkPassword) {
+      return false;
+    }
+
+    return true;
+  }
+
+  defaultMessage(): string {
+    return 'Your current password is incorrect.';
+  }
+}
 
 export function UserPasswordCorrectValidator(
   validationOptions?: ValidationOptions,
 ) {
-  return (object: any, propertyName: string) => {
+  return function (object: any, propertyName: string) {
     registerDecorator({
+      name: 'IsUserComment',
       target: object.constructor,
-      propertyName,
+      propertyName: propertyName,
       options: validationOptions,
-      validator: UserPasswordCorrectConstraint,
+      validator: UserPasswordCorrectValidatorConstraint,
     });
   };
-}
-
-@ValidatorConstraint({ name: 'UserPasswordCorrect', async: true })
-@Injectable()
-export class UserPasswordCorrectConstraint
-  implements ValidatorConstraintInterface
-{
-  constructor(private userService: UserService) {}
-
-  async validate(value: string) {
-    console.log(this.userService);
-    /*
-    const user = await this.userService.findUserId(req.user.userId);
-
-    // if user exists - return false
-    if (user) {
-      return false;
-    }
-
-    // if not - user doesn't exist and we can continue
-    */
-    return true;
-  }
-
-  defaultMessage(args: ValidationArguments) {
-    return `User with this email already exists`;
-  }
 }

@@ -10,6 +10,16 @@ export class UserService {
   ) {}
 
   /**
+   * Find user by id.
+   *
+   * @param id
+   */
+  async findUserById(id: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id });
+    return user;
+  }
+
+  /**
    * Find user by email.
    *
    * @param email
@@ -17,5 +27,14 @@ export class UserService {
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ email });
     return user;
+  }
+
+  /**
+   * Update given user.
+   *
+   * @param User user
+   */
+  async updateUser(user) {
+    await this.userRepository.update(user.id, user);
   }
 }

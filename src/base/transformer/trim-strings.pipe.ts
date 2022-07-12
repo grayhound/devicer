@@ -2,7 +2,13 @@ import { AbstractTransformPipe } from './abstract-transform.pipe';
 
 export class TrimStringsPipe extends AbstractTransformPipe {
   except() {
-    return ['password', 'passwordConfirmation'];
+    return [
+      'password',
+      'passwordCheck',
+      'oldPassword',
+      'newPassword',
+      'newPasswordCheck',
+    ];
   }
 
   protected transformValue(value: any) {

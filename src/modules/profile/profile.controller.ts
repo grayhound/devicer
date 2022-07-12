@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/entities/user.entity';
 import { ProfileChangePasswordValidatorDto } from './dto/profileChangePassword.validator.dto';
 import { ProfileService } from './profile.service';
+import { InjectUserToBody } from '../../base/decorators/inject.user.decorator';
 
 @Controller('profile')
 export class ProfileController {
@@ -14,12 +15,18 @@ export class ProfileController {
     return req.user;
   }
 
+  @InjectUserToBody()
   @UseGuards(AuthGuard('jwt'))
   @Post('changePassword')
-  changePassword(
+  async changePassword(
     @Body() changePasswordValidatorDto: ProfileChangePasswordValidatorDto,
     @Request() req,
   ) {
-    this.profileService.changePassword(req.user, changePasswordValidatorDto);
+    await this.profileService.changePassword(
+      req.user,
+      changePasswordValidatorDto,
+    );
+
+    return this.profileService.changePasswordResult();
   }
 }
