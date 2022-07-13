@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { DeviceCreateResultDto } from './dto/device.create.result.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class DeviceService {
@@ -21,7 +22,7 @@ export class DeviceService {
   ): Promise<[Device, string]> {
     const rndPass = crypto.randomBytes(20).toString('hex');
     const device = this.prepareDeviceCreate(createDeviceDto);
-    device.mqttPassword = rndPass;
+    device.mqttPassword = bcrypt.hashSync(rndPass, 12);
     device.user = requestUser.id;
 
     await this.save(device);

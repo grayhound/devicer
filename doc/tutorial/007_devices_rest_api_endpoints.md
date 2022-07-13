@@ -40,10 +40,16 @@ export abstract class BaseEntity {
 Create `Device` entity at `src/modules/device/entities/device.entity.ts`:
 
 ```typescript
-import { Entity, Column, Index, ManyToOne, PrimaryGeneratedColumn, JoinColumn, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+} from 'typeorm';
 import { BaseEntity } from '../../../base/base.entity';
 import { User } from '../../user/entities/user.entity';
-import * as bcrypt from 'bcrypt';
 
 @Entity({
   name: 'devices',
@@ -72,11 +78,6 @@ export class Device extends BaseEntity {
     length: 255,
   })
   mqttPassword: string;
-
-  @BeforeInsert()
-  updateData() {
-    this.mqttPassword = bcrypt.hashSync(this.mqttPassword, 12);
-  }
 }
 ```
 
@@ -275,6 +276,7 @@ import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { DeviceCreateResultDto } from './dto/device.create.result.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class DeviceService {
@@ -289,7 +291,7 @@ export class DeviceService {
   ): Promise<[Device, string]> {
     const rndPass = crypto.randomBytes(20).toString('hex');
     const device = this.prepareDeviceCreate(createDeviceDto);
-    device.mqttPassword = rndPass;
+    device.mqttPassword = bcrypt.hashSync(rndPass, 12);
     device.user = requestUser.id;
 
     await this.save(device);
