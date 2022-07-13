@@ -30,7 +30,7 @@ export class ProfileService {
 
     user.password = changePasswordUserSaveDto.password;
 
-    await this.userService.updateUser(user);
+    await this.userService.saveUser(user);
   }
 
   /**

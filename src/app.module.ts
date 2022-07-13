@@ -8,6 +8,7 @@ import { SignupModule } from './modules/signup/signup.module';
 import { loadAppConfig } from './config/loadAppConfig';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { DeviceModule } from './modules/device/device.module';
 
 const config = loadAppConfig(process.env.NODE_ENV);
 
@@ -25,6 +26,7 @@ const config = loadAppConfig(process.env.NODE_ENV);
     SignupModule,
     AuthModule,
     ProfileModule,
+    DeviceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

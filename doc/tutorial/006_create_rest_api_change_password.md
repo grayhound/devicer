@@ -213,8 +213,8 @@ export class UserService {
    *
    * @param User user
    */
-  async updateUser(user) {
-    await this.userRepository.update(user.id, user);
+  async saveUser(user) {
+    await this.userRepository.save(user);
   }
 
   ...
@@ -367,7 +367,7 @@ export class ProfileService {
 
     user.password = changePasswordUserSaveDto.password;
 
-    await this.userService.updateUser(user);
+    await this.userService.saveUser(user);
   }
 
   /**
