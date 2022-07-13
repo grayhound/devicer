@@ -74,7 +74,7 @@ export class Device extends BaseEntity {
   mqttPassword: string;
 
   @BeforeInsert()
-  updateDates() {
+  updateData() {
     this.mqttPassword = bcrypt.hashSync(this.mqttPassword, 12);
   }
 }

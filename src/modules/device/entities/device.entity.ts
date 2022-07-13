@@ -1,4 +1,13 @@
-import { Entity, Column, Index, ManyToOne, PrimaryGeneratedColumn, JoinColumn, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 import { BaseEntity } from '../../../base/base.entity';
 import { User } from '../../user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
@@ -32,7 +41,7 @@ export class Device extends BaseEntity {
   mqttPassword: string;
 
   @BeforeInsert()
-  updateDates() {
+  updateData() {
     this.mqttPassword = bcrypt.hashSync(this.mqttPassword, 12);
   }
 }
