@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --runInBand",
-    "migrations:generate": "cross-env-shell MIGRATION_NAME=$npm_config_name \"typeorm-ts-node-commonjs migration:generate --check=true src/migrations/$MIGRATION_NAME -d src/config/envs/dev/typeorm.datasource.ts\"",
+    "migrations:generate": "npx typeorm-ts-node-commonjs migration:generate -d src/config/envs/dev/typeorm.datasource.ts",
     "migrations:run": "npx typeorm-ts-node-commonjs migration:run -d src/config/envs/dev/typeorm.datasource.ts"
   },
   "dependencies": {

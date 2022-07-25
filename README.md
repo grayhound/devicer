@@ -37,7 +37,7 @@ run development server:
 `npm run start:dev` 
 
 generate new migrations with %migration_name% name:
-`npm run migrations:generate --name=%migration_name%`
+`npm run migrations:generate -- src/migrations/%migration_name%`
 
 run migrations: 
 `npm run migrations:run`
