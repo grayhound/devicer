@@ -8,10 +8,13 @@ import {
 } from '@nestjs/common';
 import { TrimStringsPipe } from './base/transformer/trim-strings.pipe';
 import { useContainer } from 'class-validator';
+import Helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  app.use(Helmet());
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
