@@ -1,3 +1,5 @@
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+
 const config = {
   type: 'postgres',
 
@@ -16,6 +18,8 @@ const config = {
   migrationsTableName: 'migrations',
 
   migrations: ['dist/migrations/*{.ts,.js}'],
+
+  namingStrategy: new SnakeNamingStrategy(),
 };
 
 export default config;

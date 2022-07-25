@@ -48,7 +48,7 @@ export class DeviceService {
       throw new HttpException('Device not found', HttpStatus.NOT_FOUND);
     }
     device.isDeleted = true;
-    await this.save(device);
+    // await this.save(device);
   }
 
   /**
@@ -59,15 +59,21 @@ export class DeviceService {
    * @param boolean findDeleted - should it find deleted devices?
    */
   async findById(id: string, user, findDeleted = false): Promise<Device> {
-    const whereParams = {
-      id,
-      user: { id: user.id },
-      isDeleted: false,
+    const request = {
+      where: {
+        id,
+        // user: { id: user.id },
+        isDeleted: false,
+      },
+      relations: {
+        user: true,
+      },
     };
     if (findDeleted) {
-      whereParams.isDeleted = true;
+      request.where.isDeleted = true;
     }
-    const device = await this.deviceRepository.findOneBy(whereParams);
+    const device = await this.deviceRepository.findOne(request);
+    console.log(device);
     return device;
   }
 

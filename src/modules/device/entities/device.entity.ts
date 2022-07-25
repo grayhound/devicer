@@ -24,6 +24,8 @@ export class Device extends BaseEntity {
   @Index('device_name_idx')
   name: string;
 
+
+
   @ManyToOne(() => User, (user) => user.devices)
   @JoinColumn({
     name: 'user_id',
