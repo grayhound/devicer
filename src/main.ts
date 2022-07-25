@@ -15,6 +15,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.use(Helmet());
+  app.enableCors();
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
