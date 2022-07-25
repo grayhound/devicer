@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DeviceCreateValidatorDto } from './dto/device.create.validator.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { Device } from './entities/device.entity';
@@ -34,7 +34,7 @@ export class DeviceService {
     return `This action returns all device`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} device`;
   }
 
@@ -42,8 +42,33 @@ export class DeviceService {
     return `This action updates a #${id} device`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} device`;
+  async remove(id: string, user) {
+    const device = await this.findById(id, user);
+    if (!device) {
+      throw new HttpException('Device not found', HttpStatus.NOT_FOUND);
+    }
+    device.isDeleted = true;
+    await this.save(device);
+  }
+
+  /**
+   * Find device by ID.
+   *
+   * @param string id - Device ID.
+   * @param Object user - user from request.
+   * @param boolean findDeleted - should it find deleted devices?
+   */
+  async findById(id: string, user, findDeleted = false): Promise<Device> {
+    const whereParams = {
+      id,
+      user: { id: user.id },
+      isDeleted: false,
+    };
+    if (findDeleted) {
+      whereParams.isDeleted = true;
+    }
+    const device = await this.deviceRepository.findOneBy(whereParams);
+    return device;
   }
 
   /**
@@ -69,6 +94,15 @@ export class DeviceService {
     const createDevicePlain = instanceToPlain(createDeviceDto);
     const device = plainToInstance(Device, createDevicePlain);
     return device;
+  }
+
+  /**
+   * Send success message about "deleted" device.
+   */
+  deleteResult() {
+    return {
+      message: 'Device is now deleted',
+    };
   }
 
   /**

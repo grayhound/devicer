@@ -30,7 +30,7 @@ export class DeviceController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.deviceService.findOne(+id);
+    return this.deviceService.findOne(id);
   }
 
   @Patch(':id')
@@ -38,8 +38,10 @@ export class DeviceController {
     return this.deviceService.update(+id, updateDeviceDto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.deviceService.remove(+id);
+  async remove(@Param('id') id: string, @Request() req) {
+    await this.deviceService.remove(id, req.user);
+    return this.deviceService.deleteResult();
   }
 }

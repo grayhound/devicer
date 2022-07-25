@@ -36,4 +36,7 @@ export class Device extends BaseEntity {
     length: 255,
   })
   mqttPassword: string;
+
+  @Column('boolean', { default: false })
+  isDeleted: boolean = false;
 }

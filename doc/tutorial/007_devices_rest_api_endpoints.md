@@ -344,4 +344,33 @@ The main thing is `create` method. Here we generate random password, set user an
 
 Password generated will be exposed ONCE. `Device` entity saved will have password hashed.
 
-## Get device
+## Delete device.
+
+> But before we start - I highly recommend not to delete any entities from the database.
+>
+> Once it's gone - it's gone. The only way to get entity back will be backups.
+>
+> That's why a recommend to use flag `isDeleted`.
+
+Lets update `DeviceEntity` and add `isDeleted` column:
+
+```typescript
+...
+
+@Entity({
+  name: 'devices',
+})
+export class Device extends BaseEntity {
+  ...
+
+  @Column('boolean', { default: false })
+  isDeleted: boolean = false;
+}
+```
+
+Create new migration and run it:
+
+`npx typeorm-ts-node-commonjs migration:generate src/migrations/DeviceIsDeletedField -d src/config/envs/dev/typeorm.datasource.ts`
+
+`npx typeorm-ts-node-commonjs migration:run -d src/config/envs/dev/typeorm.datasource.ts`
+

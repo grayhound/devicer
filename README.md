@@ -1,13 +1,6 @@
 # Devicer
 
-[![tested with jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
-[![jest](https://jestjs.io/img/jest-badge.svg)](https://github.com/facebook/jest)
-
-[Devicer tutorial docs](doc/tutorial/README.md)
-
 ## Introduction
-
-Welcome to my humble tutorial called "Devicer".
 
 So what's a "Devicer"? This is a small application that will be available to get data from sensors of different devices.
 
@@ -44,10 +37,10 @@ run development server:
 `npm run start:dev` 
 
 generate new migrations with %migration_name% name:
-`npx typeorm-ts-node-commonjs migration:generate src/migrations/%migration_name% -d src/config/envs/dev/typeorm.datasource.ts`
+`npm run migrations:generate --name=%migration_name%`
 
 run migrations: 
-`npx typeorm-ts-node-commonjs migration:run -d src/config/envs/dev/typeorm.datasource.ts`
+`npm run migrations:run`
 
 run end-to-end tests:
 `npm run test:e2e`
