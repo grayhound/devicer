@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { DeviceCreateResultDto } from './dto/device.create.result.dto';
 import * as bcrypt from 'bcrypt';
+import { User } from "../user/entities/user.entity";
 
 @Injectable()
 export class DeviceService {
@@ -23,7 +24,7 @@ export class DeviceService {
     const rndPass = crypto.randomBytes(20).toString('hex');
     const device = this.prepareDeviceCreate(createDeviceDto);
     device.mqttPassword = bcrypt.hashSync(rndPass, 12);
-    device.user = requestUser.id;
+    device.userId = requestUser.id;
 
     await this.save(device);
 
@@ -42,13 +43,19 @@ export class DeviceService {
     return `This action updates a #${id} device`;
   }
 
-  async remove(id: string, user) {
+  /**
+   * Remove device.
+   *
+   * @param string id - Device ID.
+   * @param User user - User from request.
+   */
+  async remove(id: string, user: User) {
     const device = await this.findById(id, user);
     if (!device) {
       throw new HttpException('Device not found', HttpStatus.NOT_FOUND);
     }
     device.isDeleted = true;
-    // await this.save(device);
+    await this.save(device);
   }
 
   /**
@@ -62,18 +69,14 @@ export class DeviceService {
     const request = {
       where: {
         id,
-        // user: { id: user.id },
+        userId: user.id,
         isDeleted: false,
-      },
-      relations: {
-        user: true,
       },
     };
     if (findDeleted) {
       request.where.isDeleted = true;
     }
     const device = await this.deviceRepository.findOne(request);
-    console.log(device);
     return device;
   }
 

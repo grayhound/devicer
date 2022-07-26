@@ -1,18 +1,17 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { SignupService } from './signup.service';
-import { SignupUserValidatorDto } from './dto/signupUser.validator.dto';
-import { SignupUserResultDto } from './dto/signupUser.result.dto';
+import { SignupPostValidatorDto } from './dto/signup/signup.post.validator.dto';
+import { SignupPostResultDto } from './dto/signup/signup.post.result.dto';
 
 @Controller('signup')
 export class SignupController {
   constructor(private readonly signupService: SignupService) {}
 
   @Post()
-  async create(@Body() signupUserDto: SignupUserValidatorDto): Promise<SignupUserResultDto> {
-    // incoming data is validated. Now we can signup user!
-    const newUser = await this.signupService.signup(signupUserDto);
-
-    // let's prepare data to return
+  async post(
+    @Body() signupPostDto: SignupPostValidatorDto,
+  ): Promise<SignupPostResultDto> {
+    const newUser = await this.signupService.signup(signupPostDto);
     const result = this.signupService.signupResult(newUser);
     return result;
   }

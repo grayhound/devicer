@@ -1,8 +1,8 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { UserEmailUniqueValidator } from '../validators/UserEmailUnique.validator';
-import { MatchValidator } from '../../../base/validators/match.validator';
+import { UserEmailUniqueValidator } from '../../validators/UserEmailUnique.validator';
+import { MatchValidator } from '../../../../base/validators/match.validator';
 
-export class SignupUserValidatorDto {
+export class SignupPostValidatorDto {
   @UserEmailUniqueValidator()
   @IsEmail()
   @IsNotEmpty()

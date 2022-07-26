@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  Patch,
+} from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { DeviceCreateValidatorDto } from './dto/device.create.validator.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';

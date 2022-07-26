@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SignupUserValidatorDto } from './dto/signupUser.validator.dto';
-import { SignupUserSaveDto } from './dto/signupUser.save.dto';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { SignupUserResultDto } from './dto/signupUser.result.dto';
 import { UserService } from '../user/user.service';
+import { SignupPostValidatorDto } from './dto/signup/signup.post.validator.dto';
+import { SignupPostDtoConverter } from './converters/signup.post.dto.converter';
+import { User } from '../user/entities/user.entity';
+import { SignupPostResultDto } from './dto/signup/signup.post.result.dto';
 
 @Injectable()
 export class SignupService {
@@ -12,37 +12,26 @@ export class SignupService {
   /**
    * Signup user.
    *
-   * @param signupUserDto
+   * We get `validator`, convert it to `save` and get new `User`
+   *
+   * @param {SignupPostValidatorDto} validatorDto - Validator
+   * @return User
    */
-  async signup(
-    signupUserDto: SignupUserValidatorDto,
-  ): Promise<SignupUserSaveDto> {
-    // first we need to make our signupUserDto a plain JSON object
-    const signupUserJSON = instanceToPlain(signupUserDto);
-    // set up `emailOriginal` field
-    signupUserJSON.emailOriginal = signupUserDto.email;
-    // now we can convert it to the SignupUserSaveDto object
-    // by doing this we manipulate data to save it correctly.
-    const signupUserSaveDto = plainToInstance(
-      SignupUserSaveDto,
-      signupUserJSON,
-    );
-
-    // finally we can save user!
-    const user = await this.userService.userRepository.save(signupUserSaveDto);
-
+  async signup(validatorDto: SignupPostValidatorDto): Promise<User> {
+    const saveDto = SignupPostDtoConverter.validatorToSave(validatorDto);
+    const user = this.userService.userRepository.create(saveDto);
+    await this.userService.userRepository.insert(user);
     return user;
   }
 
   /**
-   * Convert SignupUserSaveDto to SignupUserResultDto.
-   * We need to hide some data. We don't need to show our hashed password.
+   * Get JSON response result for `/signup/post`.
    *
-   * @param newUser
+   * @param {User} newUser - Newly Signuped User.
+   * @return SignupPostResultDto - Result DTO.
    */
-  signupResult(newUser: SignupUserSaveDto): SignupUserResultDto {
-    const newUserJson = instanceToPlain(newUser);
-    const result = plainToInstance(SignupUserResultDto, newUserJson);
+  signupResult(newUser: User): SignupPostResultDto {
+    const result = SignupPostDtoConverter.userToResult(newUser);
     return result;
   }
 }

@@ -24,12 +24,11 @@ export class Device extends BaseEntity {
   @Index('device_name_idx')
   name: string;
 
-
+  @Column()
+  userId: string;
 
   @ManyToOne(() => User, (user) => user.devices)
   @JoinColumn({
-    name: 'user_id',
-    referencedColumnName: 'id',
     foreignKeyConstraintName: 'fk_user_id',
   })
   user: User;

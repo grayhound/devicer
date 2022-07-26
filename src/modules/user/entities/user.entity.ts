@@ -1,4 +1,11 @@
-import { Entity, Column, Index, Unique, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  Index,
+  Unique,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { BaseEntity } from '../../../base/base.entity';
 import { Device } from '../../device/entities/device.entity';
 
