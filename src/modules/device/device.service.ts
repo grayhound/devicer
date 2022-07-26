@@ -7,8 +7,8 @@ import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { DeviceCreateResultDto } from './dto/device.create.result.dto';
-import * as bcrypt from 'bcrypt';
-import { User } from "../user/entities/user.entity";
+import { User } from '../user/entities/user.entity';
+import { DeviceCreateDtoConverter } from './converter/device.create.dto.converter';
 
 @Injectable()
 export class DeviceService {
@@ -18,15 +18,18 @@ export class DeviceService {
   ) {}
 
   async create(
-    createDeviceDto: DeviceCreateValidatorDto,
+    validatorDto: DeviceCreateValidatorDto,
     requestUser,
   ): Promise<[Device, string]> {
     const rndPass = crypto.randomBytes(20).toString('hex');
-    const device = this.prepareDeviceCreate(createDeviceDto);
-    device.mqttPassword = bcrypt.hashSync(rndPass, 12);
-    device.userId = requestUser.id;
 
-    await this.save(device);
+    const saveDto = DeviceCreateDtoConverter.validatorToSave(
+      validatorDto,
+      rndPass,
+      requestUser.id,
+    );
+    const device = this.deviceRepository.create(saveDto);
+    await this.deviceRepository.insert(device);
 
     return [device, rndPass];
   }
@@ -55,7 +58,7 @@ export class DeviceService {
       throw new HttpException('Device not found', HttpStatus.NOT_FOUND);
     }
     device.isDeleted = true;
-    await this.save(device);
+    await this.deviceRepository.update({ id: device.id }, device);
   }
 
   /**
@@ -86,23 +89,8 @@ export class DeviceService {
    * @param deviceCreateSaveResult
    */
   createResult(device: Device, password: string): DeviceCreateResultDto {
-    const createDevicePlain = instanceToPlain(device);
-    const result = plainToInstance(DeviceCreateResultDto, createDevicePlain, {
-      excludeExtraneousValues: true,
-    });
-    result.password = password;
+    const result = DeviceCreateDtoConverter.deviceToResult(device, password);
     return result;
-  }
-
-  /**
-   * Prpare device entity object form incoming DTO.
-   *
-   * @param createDeviceDto
-   */
-  prepareDeviceCreate(createDeviceDto: DeviceCreateValidatorDto): Device {
-    const createDevicePlain = instanceToPlain(createDeviceDto);
-    const device = plainToInstance(Device, createDevicePlain);
-    return device;
   }
 
   /**
@@ -112,15 +100,5 @@ export class DeviceService {
     return {
       message: 'Device is now deleted',
     };
-  }
-
-  /**
-   * Save device via repository.
-   *
-   * @param Device device
-   */
-  async save(device: Device): Promise<Device> {
-    const result = await this.deviceRepository.save(device);
-    return result;
   }
 }
