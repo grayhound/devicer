@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { AuthUserValidatorDto } from './dto/authUser.validator.dto';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { AuthUserSaveDto } from './dto/authUser.save.dto';
-import { AuthUserResultDto } from './dto/authUser.result.dto';
 import * as bcrypt from 'bcrypt';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
+import { AuthUserResultDto } from './dto/authUser.result.dto';
+import { AuthUserSaveDto } from './dto/authUser.save.dto';
+import { AuthUserValidatorDto } from './dto/authUser.validator.dto';
 
 @Injectable()
 export class AuthService {
