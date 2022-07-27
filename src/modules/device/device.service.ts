@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as crypto from 'crypto';
+import { Repository } from 'typeorm';
+import { User } from '../user/entities/user.entity';
+import { DeviceCreateDtoConverter } from './converter/device.create.dto.converter';
+import { DeviceCreateResultDto } from './dto/device.create.result.dto';
 import { DeviceCreateValidatorDto } from './dto/device.create.validator.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { Device } from './entities/device.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
-import { DeviceCreateResultDto } from './dto/device.create.result.dto';
-import { User } from '../user/entities/user.entity';
-import { DeviceCreateDtoConverter } from './converter/device.create.dto.converter';
 
 @Injectable()
 export class DeviceService {
@@ -104,9 +104,9 @@ export class DeviceService {
   /**
    * Send success message about "deleted" device.
    *
-   * @returns {Object}
+   * @returns {object}
    */
-  deleteResult() {
+  deleteResult(): object {
     return {
       message: 'Device is now deleted',
     };
