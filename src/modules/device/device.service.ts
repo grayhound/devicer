@@ -5,7 +5,6 @@ import { Device } from './entities/device.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { DeviceCreateResultDto } from './dto/device.create.result.dto';
 import { User } from '../user/entities/user.entity';
 import { DeviceCreateDtoConverter } from './converter/device.create.dto.converter';
@@ -17,6 +16,13 @@ export class DeviceService {
     public readonly deviceRepository: Repository<Device>,
   ) {}
 
+  /**
+   * Create new device for User.
+   *
+   * @param {DeviceCreateValidatorDto} validatorDto - Create Device Validate
+   * @param {Object} requestUser - Authenticated user
+   * @returns {Promise<[Device, string]>} - return array of Device and generated password for this device.
+   */
   async create(
     validatorDto: DeviceCreateValidatorDto,
     requestUser,
@@ -47,10 +53,10 @@ export class DeviceService {
   }
 
   /**
-   * Remove device.
+   * Remove users device.
    *
-   * @param string id - Device ID.
-   * @param User user - User from request.
+   * @param {string} id - Device ID.
+   * @param {User} user - User from request.
    */
   async remove(id: string, user: User) {
     const device = await this.findById(id, user);
@@ -86,7 +92,9 @@ export class DeviceService {
   /**
    * Prepare result for response.
    *
-   * @param deviceCreateSaveResult
+   * @param {Device} device - New device
+   * @param {string} password - Generated password for device.
+   * @returns {DeviceCreateResultDto} - DTO for result.
    */
   createResult(device: Device, password: string): DeviceCreateResultDto {
     const result = DeviceCreateDtoConverter.deviceToResult(device, password);
@@ -95,6 +103,8 @@ export class DeviceService {
 
   /**
    * Send success message about "deleted" device.
+   *
+   * @returns {Object}
    */
   deleteResult() {
     return {
