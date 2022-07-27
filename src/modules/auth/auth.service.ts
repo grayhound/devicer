@@ -18,20 +18,18 @@ export class AuthService {
   /**
    * Try to authenticate user with email and password.
    *
-   * @param AuthUserValidatorDto authUserDto
+   * @param {AuthUserValidatorDto} authUserDto - Auth Validator.
+   * @return {AuthUserResultDto} - Authentication result to return to user.
    */
   async tryAuthenticate(
     authUserDto: AuthUserValidatorDto,
   ): Promise<AuthUserResultDto> {
-    // first we need to normalize email
     const authUserSaveDto = this.prepareAuthSaveDto(authUserDto);
     const user = await this.userService.findUserByEmail(authUserSaveDto.email);
-    // if user not found - return null
     if (!user) {
       return null;
     }
 
-    // now we need to check password
     const passwordCheck = await this.checkPassword(user, authUserDto.password);
     if (!passwordCheck) {
       return null;
@@ -47,7 +45,7 @@ export class AuthService {
   /**
    * Format incoming validated data.
    *
-   * @param authUserDto
+   * @param {AuthUserValidatorDto} authUserDto
    */
   prepareAuthSaveDto(authUserDto: AuthUserValidatorDto): AuthUserSaveDto {
     const authUserJSON = instanceToPlain(authUserDto);
