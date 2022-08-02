@@ -1,44 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { ProfileChangePasswordValidatorDto } from './dto/profileChangePassword.validator.dto';
 import { UserService } from '../user/user.service';
-import { plainToInstance } from 'class-transformer';
-import { ProfileChangePasswordSaveDto } from './dto/profileChangePassword.save.dto';
+import { ProfileChangePasswordDtoConverter } from './converter/profile.changePassword.dto.converter';
+import { ProfileChangePasswordResultDto } from './dto/profileChangePassword.result.dto';
+import { ProfileChangePasswordValidatorDto } from './dto/profileChangePassword.validator.dto';
 
 @Injectable()
 export class ProfileService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private converter: ProfileChangePasswordDtoConverter,
+  ) {}
 
   /**
    * Change user password.
    *
-   * @param requestUser
-   * @param changePasswordValidatorDto
+   * @param {UserJwt} requestUser - Authenticated user from request.
+   * @param {ProfileChangePasswordValidatorDto} changePasswordValidatorDto - Validated data from request.
+   * @return {User} - User with updated password.
    */
   async changePassword(
-    requestUser,
+    requestUser: UserJwt,
     changePasswordValidatorDto: ProfileChangePasswordValidatorDto,
   ) {
-    const user = await this.userService.findUserById(requestUser.id);
-
-    const changePasswordUserJSON = {
-      password: changePasswordValidatorDto.newPassword,
-    };
-    const changePasswordUserSaveDto = plainToInstance(
-      ProfileChangePasswordSaveDto,
-      changePasswordUserJSON,
-    );
-
-    user.password = changePasswordUserSaveDto.password;
-
-    await this.userService.saveUser(user);
+    const user = this.converter.validatorToSave(changePasswordValidatorDto);
+    await this.userService.userRepository.update({ id: requestUser.id }, user);
+    return user;
   }
 
   /**
    * Send success message.
    */
-  changePasswordResult() {
-    return {
-      message: 'User password changed successfully',
-    };
+  changePasswordResult(): ProfileChangePasswordResultDto {
+    return new ProfileChangePasswordResultDto();
   }
 }

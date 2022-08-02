@@ -32,6 +32,7 @@ export class UserService {
   /**
    * Update given user.
    *
+   * @deprecated
    * @param User user
    */
   async saveUser(user) {

@@ -1,9 +1,17 @@
-import { Controller, Get, UseGuards, Request, Post, Body, HttpCode } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { InjectUserToBody } from '../../base/decorators/inject.user.decorator';
 import { User } from '../user/entities/user.entity';
 import { ProfileChangePasswordValidatorDto } from './dto/profileChangePassword.validator.dto';
 import { ProfileService } from './profile.service';
-import { InjectUserToBody } from '../../base/decorators/inject.user.decorator';
 
 @Controller('profile')
 export class ProfileController {
