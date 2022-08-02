@@ -3,6 +3,7 @@ import { SignupTests } from './signup/signup.tests';
 import { AuthTests } from './auth/auth.tests';
 import { ProfileTests } from './profile/profile.tests';
 import { ProfileChangePasswordTests } from './profile/changePassword/changePassword.tests';
+import { DeviceTests } from './device/device.tests';
 
 describe('Tests', () => {
   it('/ (GET)', () => {
@@ -40,7 +41,15 @@ describe('ProfileTests', () => {
 describe('ProfileChangePasswordTests', () => {
   describe('ProfileChangePasswordGetTest', ProfileChangePasswordTests.get);
   describe('ProfileChangePasswordPostTest', ProfileChangePasswordTests.post);
-  describe('ProfileChangePasswordDeleteTest', ProfileChangePasswordTests.delete);
+  describe(
+    'ProfileChangePasswordDeleteTest',
+    ProfileChangePasswordTests.delete,
+  );
   describe('ProfileChangePasswordPatchTest', ProfileChangePasswordTests.patch);
   describe('ProfileChangePasswordPutTest', ProfileChangePasswordTests.put);
+});
+
+describe('DeviceTests', () => {
+  describe('DevicePostTests', DeviceTests.post);
+  describe('DevicePutTests', DeviceTests.put);
 });

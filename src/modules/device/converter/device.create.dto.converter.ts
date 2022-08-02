@@ -2,7 +2,10 @@ import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { DeviceCreateValidatorDto } from '../dto/device.create.validator.dto';
 import { DeviceCreateSaveDto } from '../dto/device.create.save.dto';
 import { Device } from '../entities/device.entity';
-import { DeviceCreateResultDto } from '../dto/device.create.result.dto';
+import {
+  DeviceCreateResultDto,
+  DeviceResultDataDto,
+} from '../dto/device.create.result.dto';
 
 /**
  * DTO and entities converted for `[POST] /device`
@@ -37,11 +40,13 @@ export class DeviceCreateDtoConverter {
     device: Device,
     password: string,
   ): DeviceCreateResultDto {
-    const plain = instanceToPlain(device);
-    plain.password = password;
-    const resultDto = plainToInstance(DeviceCreateResultDto, plain, {
+    const data = instanceToPlain(device);
+    data.password = password;
+    const dataDto = plainToInstance(DeviceResultDataDto, data, {
       excludeExtraneousValues: true,
     });
-    return resultDto;
+    const result = new DeviceCreateResultDto();
+    result.data = dataDto;
+    return result;
   }
 }

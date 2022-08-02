@@ -1,6 +1,7 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
 
-export class DeviceCreateResultDto {
+export class DeviceResultDataDto {
   @Expose()
   id: string;
 
@@ -9,4 +10,14 @@ export class DeviceCreateResultDto {
 
   @Expose()
   password: string;
+}
+
+export class DeviceCreateResultDto {
+  @Type(() => DeviceResultDataDto)
+  @ValidateNested()
+  @Expose()
+  data: DeviceResultDataDto;
+
+  @Expose()
+  message = 'Device successfully created.';
 }
