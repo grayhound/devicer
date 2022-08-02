@@ -51,5 +51,6 @@ describe('ProfileChangePasswordTests', () => {
 
 describe('DeviceTests', () => {
   describe('DevicePostTests', DeviceTests.post);
+  describe('DeviceGetListTests', DeviceTests.getList);
   describe('DevicePutTests', DeviceTests.put);
 });

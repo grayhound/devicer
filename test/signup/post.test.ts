@@ -277,7 +277,7 @@ export const SignupPostTest = () => {
       expect(res.status).toBe(201);
       expect(res.body).toBeObject();
       expect(res.body).toHaveProperty('email');
-      expect(res.body.email).toBe(checkUps.email.uppercaseCorrect.toLowerCase());
+      expect(res.body.email).toBe(checkUps.email.uppercaseCorrect);
     });
 
     it('new user must exist in the database', async () => {
@@ -343,11 +343,13 @@ export const SignupPostTest = () => {
       expect(res.status).toBe(201);
       expect(res.body).toBeObject();
       expect(res.body).toHaveProperty('email');
-      expect(res.body.email).toBe(checkUps.email.whitespaceCorrect.toLowerCase().trim());
+      expect(res.body.email).toBe(checkUps.email.whitespaceCorrect.trim());
     });
 
     it('new user must exist in the database', async () => {
-      const checkedEmail = checkUps.email.whitespaceCorrect.toLowerCase().trim();
+      const checkedEmail = checkUps.email.whitespaceCorrect
+        .toLowerCase()
+        .trim();
       const user = await global.appModule
         .get('UserRepository')
         .findOneBy({ email: checkedEmail });

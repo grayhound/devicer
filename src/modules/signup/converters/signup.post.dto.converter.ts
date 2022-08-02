@@ -32,6 +32,7 @@ export class SignupPostDtoConverter {
    */
   static userToResult(user: User): SignupPostResultDto {
     const plain = instanceToPlain(user);
+    plain.email = user.emailOriginal;
     const resultDto = plainToInstance(SignupPostResultDto, plain, {
       excludeExtraneousValues: true,
     });
