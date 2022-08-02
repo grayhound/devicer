@@ -15,7 +15,7 @@ import { UpdateDeviceDto } from './dto/update-device.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { DeviceCreateResultDto } from './dto/device.create.result.dto';
 
-@Controller('device')
+@Controller('devices')
 export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 

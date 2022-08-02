@@ -1,8 +1,4 @@
-import {
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-  CreateDateColumn,
-} from 'typeorm';
+import { UpdateDateColumn, CreateDateColumn } from 'typeorm';
 
 export abstract class BaseEntity {
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
